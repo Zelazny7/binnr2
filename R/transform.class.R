@@ -12,7 +12,6 @@ setClass("Continuous",
     x    = "numeric",
     cuts = "numeric",
     exceptions = "numeric"),
-
   contains="Transform")
 
 setClass("Discrete",
@@ -31,8 +30,16 @@ setMethod("show", signature = "Discrete", definition = function(object) {
 })
 
 setMethod("show", signature = "Bin", definition = function(object) {
-  print(cbind(tapply(object@y, object@transform@binned, mean)))
+  out <- tapply(object@y, object@transform@binned, function(y) {
+      c(N=length(y), Sum=sum(y), Mean=mean(y))
+    }, simplify=T)
+
+  out <- do.call(rbind, out)
+
+  print(out)
 })
+
+collapse <- function(object) {}
 
 setGeneric("collapse")
 
@@ -63,50 +70,66 @@ Continuous <- function(x, cuts, exceptions) {
   obj
 }
 
-Discrete <- function(x) {
+Discrete <- function(x, map) {
   f <- !is.na(x)
-  obj <- new("Discrete", x=x, filter=f)
+  obj <- new("Discrete", x=x, filter=f, map=map)
   obj <- collapse(obj)
   obj
 }
 
 setClass("Bin", slots = list(y="numeric", transform="Transform"))
 
-res <- rbinom(1000, 1, .25)
-
-Bin <- function(x=x, y=res) {
-  if(is.null(cuts)) cuts <- cuts
-
-  tf <- Continuous(x, cuts, exceptions)
-
-  new("Bin", y=y, transform=tf)
-
+Bin <- function(x, y, min.iv=0.01, min.cnt=10, min.res=0, max.bin=10, mono=0, exceptions=numeric(0), ...) {
+  print("In here!?")
 }
 
+setGeneric("Bin", valueClass = "Bin")
+
+setMethod("Bin", signature = "numeric", definition = function(x, y, min.iv=0.01, min.cnt=10, min.res=0, max.bin=10, mono=0, exceptions=numeric(0), ...) {
+  print("Butt!")
+  f <- !is.na(x)
+  cuts <- .Call('bin', as.double(x[f]), as.double(y[f]),
+                as.double(min.iv), as.integer(min.cnt), as.integer(min.res),
+                as.integer(max.bin), as.integer(mono), as.double(exceptions))
+
+  tf <- Continuous(x, cuts, exceptions)
+  new("Bin", y=y, transform=tf)
+})
+
+setMethod("Bin", signature = "factor", definition = function(x, y, ...) {
+  print("Factor face!")
+
+  map <- as.list(levels(x))
+  names(map) <- levels(x)
+
+  tf <- Discrete(x, map)
+  new("Bin", y=y, transform=tf)
+})
+
+setClassUnion("cantBin", c("character","logical"))
+
+setMethod("Bin", signature = "cantBin", definition = function(x, y, ...) {
+  print("What you doing fool?")
+  NULL
+})
 
 
+setMethod("-", signature = "Bin", definition = function(e1, e2) {
+  stopifnot(all(diff(e2)==1))
+  if (length(e2) <= 1) return(e1)
+  out <- callGeneric(e1@transform, e2)
+  e1@transform <- out
+  e1
+})
 
 
-x <- runif(1000)
-x[sample(1:1000, 50)] <- NA
-x[1:100] <- -1
-
-exceptions <- -1
-f <- !is.na(x) & !(x %in% exceptions)
-
-cuts <- c(-Inf, quantile(x[f], seq(0,1,0.05), na.rm = T)[-c(1,21)], Inf)
-
-y <- factor(sample(letters, 1000, replace=T))
-
-test <- Continuous(x=x, cuts=cuts, exceptions = exceptions)
-test2 <- Discrete(x=y)
+setMethod("-", signature = "Continuous", definition = function(e1, e2) {
+  print("In here")
+  e2 <- unique(pmax(pmin(tail(e2, -1), length(e1@cuts) - 1), 2))
+  new.cuts <- e1@cuts[-(e2)]
+  Continuous(e1@x, cuts=new.cuts, exceptions = e1@exceptions)
+})
 
 
-
-
-
-
-
-
-
-
+#Bin(x=titanic$SibSp, y=titanic$Survived)
+#Bin(x=titanic$Embarked, y=titanic$Survived)
