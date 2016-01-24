@@ -2,13 +2,13 @@
 # setClassUnion("transformData", c("factor", "numeric"))
 
 setClass("Bin.opts", slots = list(
-  min.iv="numeric",
-  min.cnt="numeric",
-  min.res="numeric",
-  max.bin="numeric",
-  mono="numeric",
-  exceptions="numeric"
-), contains = "VIRTUAL")
+  min.iv  = "numeric",
+  min.cnt = "numeric",
+  min.res = "numeric",
+  max.bin = "numeric",
+  mono    = "numeric",
+  exceptions = "numeric"
+), contains  = "VIRTUAL")
 
 setClass("Bin", slots = list(
   name = "character",
@@ -19,15 +19,13 @@ setClass("Bin", slots = list(
 setClass("Continuous",
   slots= list(
     x      = "numeric",
-    cuts   = "numeric",
-    filter = "logical"),
+    cuts   = "numeric"),
   contains = c("Bin", "Bin.opts"))
 
 setClass("Discrete",
   slots=list(
     x      = "factor",
-    map    = "list",
-    filter = "logical"),
+    map    = "list"),
   contains = "Bin")
 
 setClass("Classing",
@@ -42,17 +40,17 @@ setClassUnion("BinType", c("Continuous", "Discrete"))
 setMethod("as.data.frame", signature = c("Bin"), definition = function(x, row.names = NULL, optional = FALSE, ...) {
   binned <- collapse(x)
 
-  f <- x@filter
+  f <- !is.na(x@x)
 
   # counts and percents
   out <- tapply(x@y, binned, function(y) {
     N1 <- sum(y == 1)
     N0 <- sum(y == 0)
-    P1 <- N1/sum(x@y[f] == 0)
-    P0 <- N0/sum(x@y[f] == 1)
+    P1 <- N1/sum(x@y[f] == 1)
+    P0 <- N0/sum(x@y[f] == 0)
     WoE <- log(P1 / P0)
     IV = (P1 - P0) * WoE
-    c(N=length(y), N1, N0, PN=N1/length(y), P1, P0, WoE, IV)
+    c(N=length(y), N1, N0, PN=length(y)/length(x@y), P1, P0, N1/length(y), WoE, IV)
   }, simplify=FALSE)
 
   out <- do.call(rbind, out)
@@ -62,16 +60,17 @@ setMethod("as.data.frame", signature = c("Bin"), definition = function(x, row.na
 
   ## calculate totals
   Total <- apply(out, 2, sum, na.rm=T)
-  Total[4:6] <- NA
+  Total[c(5:8)] <- 0
+  Total[7] <- Total[2]/Total[1]
 
   out <- rbind(out, Total=Total)
-  colnames(out) <- c("N", "#1", "#0", "%N","%1","%0","WoE","IV")
+  colnames(out) <- c("N", "#1", "#0", "%N","%1","%0","P(1)","WoE","IV")
   out
 })
 
 setMethod("show", signature = "Bin", definition = function(object) {
   df <- as.data.frame(object)
-  iv <- df['Total', iv]
+  iv <- df['Total', "IV"]
   cat(sprintf("Variable Report: %s", object@name), sep = '\n')
   print(df, digits=4)
 
@@ -86,33 +85,31 @@ setMethod("show", signature = "Classing", definition = function(object) {
   cat(sprintf(" |-- %3d Continuous\n", cnts[2]))
 })
 
-setGeneric("collapse", function(object) {})
-
-setMethod("collapse", signature = "BinType", function(object) {
-  print("what's up!?")
+setGeneric("collapse", def = function(object, x, ...) {
+  if (missing(x)) x <- object@x
+  callGeneric(object, x=x, ...)
 })
 
-setMethod("collapse", signature = "Continuous", function(object) {
-  f <- object@filter
-  bins <- cut(object@x[f], object@cuts, include.lowest = T, dig.lab=3)
-  x <- factor(object@x, exclude=NULL, levels=c(levels(bins), object@exceptions, NA))
-  levels(x)[is.na(levels(x))] <- "Missing"
-  x[f] <- bins
-  x
+setMethod("collapse", signature = c("Continuous", "numeric"), function(object, x, ...) {
+  f <- !is.na(x) & !(x %in% object@exceptions)
+  bins <- cut(x[f], object@cuts, include.lowest = T, dig.lab=3)
+  out <- factor(x, exclude=NULL, levels=c(levels(bins), object@exceptions, NA))
+  levels(out)[is.na(levels(out))] <- "Missing"
+  out[f] <- bins
+  out
 })
 
-setMethod("collapse", signature = "Discrete", function(object) {
-  x <- object@x
+setMethod("collapse", signature = c("Discrete", "factor"), function(object, x, ...) {
   levels(x) <- c(unlist(object@map), NA)
   x
 })
 
 #' @export
-Bin <- function(x, y, min.iv=0.01, min.cnt=10, min.res=0, max.bin=10, mono=0, exceptions=numeric(0), ...) {}
+Bin <- function(x, y, min.iv=0.01, min.cnt=10, min.res=0, max.bin=10, mono=0, exceptions=numeric(0), name = "NONE", ...) {}
 
 setGeneric("Bin", valueClass = c("Bin", "Classing"))
 
-setMethod("Bin", signature = "numeric", definition = function(x, y, min.iv=0.01, min.cnt=10, min.res=0, max.bin=10, mono=0, exceptions=numeric(0), ...) {
+setMethod("Bin", signature = "numeric", definition = function(x, y, min.iv=0.01, min.cnt=10, min.res=0, max.bin=10, mono=0, exceptions=numeric(0), name = "NONE", ...) {
   ## discretize numeric vars and return the cut points
   # browser()
   f <- !is.na(x)
@@ -121,16 +118,15 @@ setMethod("Bin", signature = "numeric", definition = function(x, y, min.iv=0.01,
                 as.integer(min.res), as.integer(max.bin),
                 as.integer(mono), as.double(exceptions))
 
-  f <- !is.na(x) & !(x %in% exceptions)
-  new("Continuous", x=x, y=y, cuts=cuts, filter=f, min.iv=min.iv, min.res=min.res,
-      max.bin=max.bin, mono=mono, exceptions=exceptions, ...)
+  new("Continuous", x=x, y=y, cuts=cuts, min.iv=min.iv, min.res=min.res,
+      max.bin=max.bin, mono=mono, exceptions=exceptions, name = name)
 })
 
-setMethod("Bin", signature = "factor", definition = function(x, y, ...) {
+setMethod("Bin", signature = "factor", definition = function(x, y, name = "NONE", ...) {
   ## create a mapping of raw values to collapsed values, store in "map"
   map <- as.list(levels(x))
   names(map) <- levels(x)
-  new("Discrete", x=x, y=y, filter=!is.na(x), map=map, ...)
+  new("Discrete", x=x, y=y, map=map, name = name)
 })
 
 setClassUnion("cantBin", c("character","logical"))
@@ -140,6 +136,7 @@ setMethod("Bin", signature = "cantBin", definition = function(x, y, ...) {
 })
 
 setMethod("Bin", signature = c("Continuous", "missing"), definition = function(x, y, ...) {
+  #browser()
   if (missing(min.iv))  min.iv  <- x@min.iv
   if (missing(min.cnt)) min.cnt <- x@min.cnt
   if (missing(min.res)) min.res <- x@min.res
@@ -147,13 +144,13 @@ setMethod("Bin", signature = c("Continuous", "missing"), definition = function(x
   if (missing(mono))    mono    <- x@mono
   if (missing(exceptions)) exceptions <- x@exceptions
 
-  # browser()
-  callGeneric(x=x@x, y=x@y, cuts=x@cuts, filter=x@f, min.iv=min.iv,
+
+  callGeneric(x=x@x, y=x@y, cuts=x@cuts, min.iv=min.iv,
               min.res=min.res, max.bin=max.bin, mono=mono,
               exceptions=exceptions, name=x@name)
 })
 
-setMethod("Bin", signature = "data.frame", definition = function(x, y, min.iv=0.01, min.cnt=10, min.res=0, max.bin=10, mono=0, exceptions=numeric(0), ...) {
+setMethod("Bin", signature = "data.frame", definition = function(x, y, min.iv=0.01, min.cnt=10, min.res=0, max.bin=10, mono=0, exceptions=numeric(0), name = "NONE", ...) {
   cols <- colnames(x)
   nc <- ncol(x)
 
@@ -231,6 +228,10 @@ exception <- function(Object, val) {
   stopifnot(is.numeric(val))
   Bin(x=Object, exceptions=val)
 }
+
+setMethod("predict", signature = c("Bin"), function(object, ...) {
+  collapse(object, ...)
+})
 
 
 
