@@ -1,6 +1,15 @@
-## transform class has data, and exceptions
-# setClassUnion("transformData", c("factor", "numeric"))
+setClassUnion("ValidBinType", c("numeric", "factor"))
 
+## virtual class contained by all bins
+setClass("Bin", slots = list(
+  name = "character",
+  x    = "ValidBinType",
+  y    = "numeric",
+  woe  = "numeric",
+  rcs  = "character"
+), contains = "VIRTUAL")
+
+# bin options class used by Continuous bins
 setClass("Bin.opts", slots = list(
   min.iv  = "numeric",
   min.cnt = "numeric",
@@ -10,21 +19,15 @@ setClass("Bin.opts", slots = list(
   exceptions = "numeric"
 ), contains  = "VIRTUAL")
 
-setClass("Bin", slots = list(
-  name = "character",
-  y    = "numeric",
-  woe  = "numeric"),
-  contains = "VIRTUAL")
-
+# Continuous bins use cutpoints and have options controlling the discretization
 setClass("Continuous",
   slots= list(
-    x      = "numeric",
     cuts   = "numeric"),
   contains = c("Bin", "Bin.opts"))
 
+# discrete bins map collapsed levels to raw levls
 setClass("Discrete",
   slots=list(
-    x      = "factor",
     map    = "list"),
   contains = "Bin")
 
@@ -34,8 +37,6 @@ setClass("Classing",
     if (all(sapply(object@classing, is, "Bin"))) TRUE
     else "All members of a Classing object must be Bins"
   })
-
-setClassUnion("BinType", c("Continuous", "Discrete"))
 
 setMethod("as.data.frame", signature = c("Bin"), definition = function(x, row.names = NULL, optional = FALSE, ...) {
   binned <- collapse(x)
@@ -65,7 +66,7 @@ setMethod("as.data.frame", signature = c("Bin"), definition = function(x, row.na
 
   out <- rbind(out, Total=Total)
   colnames(out) <- c("N", "#1", "#0", "%N","%1","%0","P(1)","WoE","IV")
-  out
+  as.data.frame(out)
 })
 
 setMethod("show", signature = "Bin", definition = function(object) {
@@ -104,7 +105,7 @@ setMethod("collapse", signature = c("Discrete", "factor"), function(object, x, .
   x
 })
 
-#' @export
+# #' @export
 Bin <- function(x, y, min.iv=0.01, min.cnt=10, min.res=0, max.bin=10, mono=0, exceptions=numeric(0), name = "NONE", ...) {}
 
 setGeneric("Bin", valueClass = c("Bin", "Classing"))
@@ -118,15 +119,20 @@ setMethod("Bin", signature = "numeric", definition = function(x, y, min.iv=0.01,
                 as.integer(min.res), as.integer(max.bin),
                 as.integer(mono), as.double(exceptions))
 
-  new("Continuous", x=x, y=y, cuts=cuts, min.iv=min.iv, min.res=min.res,
-      max.bin=max.bin, mono=mono, exceptions=exceptions, name = name)
+  out <- new("Continuous", x=x, y=y, cuts=cuts, min.iv=min.iv, min.res=min.res,
+             max.bin=max.bin, mono=mono, exceptions=exceptions, name = name)
+
+  out@woe <- as.data.frame(out)$WoE
+  out
 })
 
 setMethod("Bin", signature = "factor", definition = function(x, y, name = "NONE", ...) {
   ## create a mapping of raw values to collapsed values, store in "map"
   map <- as.list(levels(x))
   names(map) <- levels(x)
-  new("Discrete", x=x, y=y, map=map, name = name)
+  out <- new("Discrete", x=x, y=y, map=map, name = name)
+  out@woe <- as.data.frame(out)$WoE
+  out
 })
 
 setClassUnion("cantBin", c("character","logical"))
@@ -136,14 +142,12 @@ setMethod("Bin", signature = "cantBin", definition = function(x, y, ...) {
 })
 
 setMethod("Bin", signature = c("Continuous", "missing"), definition = function(x, y, ...) {
-  #browser()
   if (missing(min.iv))  min.iv  <- x@min.iv
   if (missing(min.cnt)) min.cnt <- x@min.cnt
   if (missing(min.res)) min.res <- x@min.res
   if (missing(max.bin)) max.bin <- x@max.bin
   if (missing(mono))    mono    <- x@mono
   if (missing(exceptions)) exceptions <- x@exceptions
-
 
   callGeneric(x=x@x, y=x@y, cuts=x@cuts, min.iv=min.iv,
               min.res=min.res, max.bin=max.bin, mono=mono,
@@ -152,15 +156,13 @@ setMethod("Bin", signature = c("Continuous", "missing"), definition = function(x
 
 setMethod("Bin", signature = "data.frame", definition = function(x, y, min.iv=0.01, min.cnt=10, min.res=0, max.bin=10, mono=0, exceptions=numeric(0), name = "NONE", ...) {
   cols <- colnames(x)
-  nc <- ncol(x)
-
   classing <- list()
 
   dashes <- c('\\','|','/','-')
 
   for (i in seq_along(cols)) {
     vname <- cols[i]
-    cat(sprintf("\rProgress: %s %6.2f%%", dashes[(i %% 4) + 1], (100*i/nc)))
+    cat(sprintf("\rProgress: %s %6.2f%%", dashes[(i %% 4) + 1], (100*i/ncol(x))))
     classing[[vname]] <- callGeneric(
       x[,vname], y=y, min.iv=min.iv, min.cnt=min.cnt, min.res=min.res,
       max.bin=max.bin, mono=mono, exceptions=exceptions, name=vname)
