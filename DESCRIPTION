@@ -8,3 +8,18 @@ Depends:
 License: What license is it under?
 LazyData: true
 RoxygenNote: 5.0.1
+Imports:
+    glmnet
+Collate:
+    'Bin.class.R'
+    'allGenerics.R'
+    'Bin.methods.R'
+    'Methods.R'
+    'Ops.R'
+    'Scorecard.class.R'
+    'fit.methods.R'
+    'imports.R'
+    'plot.Bin.R'
+    's3generics.R'
+    'show.methods.R'
+    'util.R'
