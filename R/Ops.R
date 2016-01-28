@@ -33,7 +33,7 @@ setMethod("+", signature = c("Discrete", "numeric"),
 
 setMethod("-", signature = c("Discrete", "numeric"),
   function(e1, e2) {
-    ## create a local copy of the map
+    # browser()
     ## which values were selected for collapse?
     f <- e1@map %in% names(e1@map)[e2]
 

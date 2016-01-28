@@ -55,6 +55,9 @@ setMethod("show", signature = "Scorecard",
     show(object@classing)
   })
 
+setMethod("collapse", signature = c("Bin", "missing"),
+  function(object, x, ...) callGeneric(object, object@x))
+
 setMethod("collapse", signature = c("Continuous", "numeric"),
   function(object, x, ...) {
     f <- !is.na(x) & !(x %in% object@exceptions)
@@ -68,9 +71,10 @@ setMethod("collapse", signature = c("Continuous", "numeric"),
 
 setMethod("collapse", signature = c("Discrete", "factor"),
   function(object, x, ...) {
-    levels(x) <- c(unlist(object@map), NA)
-    levels(x)[is.na(levels(x))] <- "Missing"
-    x
+    out <- factor(x, exclude=NULL, levels=c(unique(unlist(object@map), NA)))
+    levels(out)[is.na(levels(out))] <- "Missing"
+    out[] <- object@map[as.character(x)]
+    out
   })
 
 ## set the pred slot in Bin using the WoE if values aren't passed
@@ -93,9 +97,11 @@ setMethod("Update", signature = c("Bin", "missing"),
 #' @export
 setMethod("predict", signature = c("Bin"),
   function(object, x, type=c("bins","woe","rcs","dist"), ...) {
+    # browser()
     type <- match.arg(type)
 
-    binned <- collapse(object, x=x)
+    if (missing(x)) x <- object@x
+    binned <- collapse(object, x)
 
     switch(
       type,

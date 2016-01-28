@@ -1,11 +1,7 @@
 #' @include Bin.class.R
 
 #' @export
-setGeneric("collapse",
-  function(object, x, ...) {
-    if (missing(x)) x <- object@x
-    callGeneric(object, x=x, ...)
-  })
+setGeneric("collapse", function(object, x, ...) standardGeneric("collapse"))
 
 #' @export
 setGeneric("Update", function(object, keep = TRUE, ...) standardGeneric("Update"))
@@ -16,8 +12,7 @@ setGeneric("Bin", valueClass = c("Bin", "Classing"),
            exceptions=numeric(0), name = "NONE", ...) standardGeneric("Bin"))
 
 #' @export
-setGeneric("fit",
-  function(object, data, y, ...) standardGeneric("fit"))
+setGeneric("fit", function(object, data, y, ...) standardGeneric("fit"))
 
 #' @export
 setGeneric("classing", function(object) standardGeneric("classing"))

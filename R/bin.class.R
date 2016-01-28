@@ -1,4 +1,5 @@
 setClassUnion("ValidBinType", c("numeric", "factor"))
+# setClassUnion("BinType", c("Discrete", "Cont"))
 setClassUnion("cantBin", c("character","logical"))
 
 ## virtual class contained by all bins
