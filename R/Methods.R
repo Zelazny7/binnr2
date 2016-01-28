@@ -1,4 +1,5 @@
 #' @include allGenerics.R
+#' @include Scorecard.class.R
 
 setMethod("as.data.frame", signature = c("Bin", "missing", "missing"),
   function(x, row.names = NULL, optional = FALSE, ...) {
@@ -91,7 +92,7 @@ setMethod("Update", signature = c("Bin", "missing"),
 
 #' @export
 setMethod("predict", signature = c("Bin"),
-  function(object, ..., x, type=c("bins","woe","rcs","dist")) {
+  function(object, x, type=c("bins","woe","rcs","dist"), ...) {
     type <- match.arg(type)
 
     binned <- collapse(object, x=x)
@@ -149,7 +150,7 @@ setMethod("c", signature = c("Combinable"),
 
 #' @export
 setMethod("predict", signature = c("Classing"),
-  function(object, ..., x, type="woe") {
+  function(object, x, type="woe", ...) {
     ## if no new data is passed in, get it from the classing object
     if (missing(x)) x <- as.data.frame(object)
 
@@ -169,5 +170,19 @@ setMethod("predict", signature = c("Classing"),
     }
     cat("", sep="\n")
 
-    data.frame(out)
+
+    if (type == "bins") data.frame(out) else do.call(cbind, out)
+
+  })
+
+#' @export
+setMethod("predict", signature = c("Scorecard"),
+  function(object, x, type="score", ...) {
+    if (type == "score") {
+      woe <- predict(object@classing[names(object@coef[-1])], x=x, type="woe")
+      score <- woe %*% object@coef[-1] + object@coef[1]
+      attr(score, "dimnames")[[1]] <- NULL
+      return(score)
+    }
+    callGeneric(object@classing, x=x, type=type, ...)
   })

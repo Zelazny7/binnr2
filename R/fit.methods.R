@@ -31,9 +31,13 @@ setMethod("fit", signature = c("Classing", "data.frame", "numeric"),
     fit <- glmnet::cv.glmnet(woe, y, nfolds=nfolds, lower.limits=lower.limits,
                              upper.limits=upper.limits, family=family,
                              alpha=alpha, ...)
-    ### coeficients
+
     coefs <- coef(fit, s="lambda.min")[,1]
-    new("Scorecard", fit=fit, classing=object, y=y, coef=coefs)
+    coefs <- coefs[coefs != 0]
+    contributions <- .contributions(woe[,names(coefs)[-1]], coefs, y)
+
+    new("Scorecard", fit=fit, classing=object, y=y, coef=coefs,
+        contribution=contributions)
   })
 
 #' @export

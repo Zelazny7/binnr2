@@ -61,3 +61,5 @@ setMethod("Bin", signature = "data.frame",
     cat("", sep="\n")
     new("Classing", classing=classing, y=y)
   })
+
+

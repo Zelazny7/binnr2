@@ -9,6 +9,3 @@ setClass("Scorecard",
    coef     = "numeric",
    classing = "Classing",
    contribution = "numeric"))
-
-
-

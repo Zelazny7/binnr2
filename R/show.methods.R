@@ -20,6 +20,6 @@ setMethod("show", signature = "Classing",
 
 setMethod("show", signature = "Scorecard",
   function(object) {
-    cat(sprintf("Scorecard model with %d predictors\n", length(object@coef) - 1))
+    cat(sprintf("Scorecard model with %d predictors\n", sum(object@coef != 0) - 1))
     show(object@classing)
   })

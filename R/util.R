@@ -33,3 +33,23 @@ exception <- function(Object, val) {
   stopifnot(is.numeric(val))
   Bin(x=Object, exceptions=val)
 }
+
+
+## calcualte LR2 for logistic regression
+.lr2 <- function(f, y) {
+  f <- plogis(f)
+  sum((y == 1)*log(f) + (y == 0)*log(1 - f))
+}
+
+## calculate score contributions for Scorecard
+.contributions <- function(data, coefs, y) {
+  base <- .lr2(0, y)
+  lr2 <- sapply(1:length(coefs), function(i) {
+    if (i > 1) {
+      coefs[i] <- 0
+    }
+    1 - (.lr2(data %*% coefs[-1] + coefs[1], y)/base)
+  })
+  names(lr2) <- c("Base", names(coefs)[-1])
+  lr2[1] - lr2[-1]
+}
