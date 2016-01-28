@@ -7,15 +7,17 @@ setGeneric("collapse", function(object, x, ...) standardGeneric("collapse"))
 setGeneric("Update", function(object, keep = TRUE, ...) standardGeneric("Update"))
 
 #' @export
-setGeneric("Bin", valueClass = c("Bin", "Classing"),
-  function(x, y, min.iv=0.01, min.cnt=10, min.res=0, max.bin=10, mono=0,
-           exceptions=numeric(0), name = "NONE", ...) standardGeneric("Bin"))
+setGeneric("Bin", valueClass = c("Bin", "Classing", "NULL"),
+  function(x, y, name="NONE", ...) standardGeneric("Bin"))
 
 #' @export
 setGeneric("fit", function(object, data, y, ...) standardGeneric("fit"))
 
 #' @export
 setGeneric("classing", function(object) standardGeneric("classing"))
+
+#' @export
+setGeneric("adjust", function(x) standardGeneric("adjust"))
 
 #' @export
 setGeneric("predict")

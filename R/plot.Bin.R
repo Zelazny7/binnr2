@@ -30,6 +30,7 @@ setMethod("plot", signature = "Bin", definition = function(x, y, ...) {
   par(oma = c(2, 1, 1, 1))
   lims <- c(min(WoE) - 0.5, max(WoE) + 0.5)
   par(mar=c(5, maxN, 1, 1))
+
   bp <- barplot(rev(WoE), horiz=T, las=1, xlim = lims, cex.names = 0.8,
                 xlab = "Weight-of-Evidence", col = colors, cex.axis = 0.8)
 
@@ -43,5 +44,8 @@ setMethod("plot", signature = "Bin", definition = function(x, y, ...) {
   legend("bottom", c("<100", "<500", "<1000", "<5000", "5000+"),
          fill = cold.day.palette, horiz=T, inset = c(0,0), xpd=T, cex = 0.75,
          pt.cex = 0.8)
+
+
+
   par(old.par)
 })

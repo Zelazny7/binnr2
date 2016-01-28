@@ -53,3 +53,9 @@ exception <- function(Object, val) {
   names(lr2) <- c("Base", names(coefs)[-1])
   lr2[1] - lr2[-1]
 }
+
+## print progress update bar to console
+.progress <- function(i, max, text = "Progress") {
+  progress <- paste(rep("=", (10*i/max)), collapse="")
+  cat(sprintf("\r%s : %-10s|", text, progress))
+}

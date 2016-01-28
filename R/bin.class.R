@@ -2,6 +2,12 @@ setClassUnion("ValidBinType", c("numeric", "factor"))
 # setClassUnion("BinType", c("Discrete", "Cont"))
 setClassUnion("cantBin", c("character","logical"))
 
+setClass("Meta", slots = list(
+  drop = "logical",
+  new  = "logical"),
+  prototype = prototype(drop=FALSE, new=TRUE),
+  contains = "VIRTUAL")
+
 ## virtual class contained by all bins
 setClass("Bin", slots = list(
   name = "character",
@@ -9,8 +15,8 @@ setClass("Bin", slots = list(
   y    = "numeric",
   woe  = "numeric",
   rcs  = "character",
-  pred = "numeric"
-), contains = "VIRTUAL")
+  pred = "numeric"),
+  contains = c("Meta", "VIRTUAL"))
 
 # bin options class used by Continuous bins
 setClass("Bin.opts", slots = list(

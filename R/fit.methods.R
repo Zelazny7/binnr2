@@ -16,7 +16,6 @@ setMethod("classing", "Scorecard", function(object) {
 #' @export
 setMethod("fit", signature = c("canFit", "missing", "missing"),
   function(object, data, y, ...) {
-    print("In here!")
     classing <- classing(object)
     data <- as.data.frame(classing)
     callGeneric(object=classing, data=data, y=classing@y, ...)

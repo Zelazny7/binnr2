@@ -3,8 +3,9 @@
 setMethod("show", signature = "Bin",
   function(object) {
     df <- as.data.frame(object)
-    iv <- df['Total', "IV"]
-    cat(sprintf("Variable Report: %s IV: %0.3f ", object@name, iv), sep = '\n')
+    # iv <- df['Total', "IV"]
+    cat(sprintf("\n> %-20s | drop: %5s", object@name, as.character(object@drop)),
+        sep = '\n')
     print(df, digits=5)
   })
 
