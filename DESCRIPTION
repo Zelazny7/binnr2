@@ -23,5 +23,6 @@ Collate:
     'plot.Bin.R'
     'predict.methods.R'
     's3generics.R'
+    'segmented.class.R'
     'show.methods.R'
     'util.R'

@@ -24,7 +24,7 @@ mono <- function(Object, val) {
 
 #' @export
 reset <- function(Object) {
-  Bin(x=Object@x, y=Object@y)
+  Bin(Object)
 }
 
 #' @export

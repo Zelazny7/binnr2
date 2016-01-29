@@ -128,7 +128,7 @@ setMethod("adjust", "Classing",
       } else if (command == "u") {
         #out[[i]] <- undo(out[[i]])
       } else if (command == "r") {
-        x[[i]] <- reset(x[[i]])
+        x[[i]] <- Bin(x[[i]])
       } else {
         tryCatch({
           x[[i]] <- eval(parse(text=paste("x[[i]]", command)))

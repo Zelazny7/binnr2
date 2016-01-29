@@ -56,3 +56,30 @@ setMethod("predict", signature = c("Scorecard"),
     }
     callGeneric(object@classing, x=x, type=type, ...)
   })
+
+
+### TODO: Add x to predict Generic function
+
+#' @export
+setMethod("predict", signature = c("Segmented-Classing"),
+  function(object, x, seg, type="score", ...) {
+    lapply(object@classings, predict, x=x, type=type, ...)
+  })
+
+#' @export
+setMethod("predict", signature = c("Segmented-Scorecard"),
+  function(object, x, seg, type="score", ...) {
+
+    if (type == "score") {
+      out <- lapply(object@scorecards, predict, x=x, type=type, ...)
+      if (missing(seg)) seg <- object@segmentor
+
+      ## create matrix for indexing scores
+      idx <- cbind(seq_along(seg), match(seg, names(out)))
+      do.call(cbind, out)[idx]
+    } else {
+      ## should call the segmented-classing predict function
+      callNextMethod()
+    }
+  })
+

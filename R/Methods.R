@@ -47,8 +47,8 @@ setMethod("collapse", signature = c("Continuous", "numeric"),
 
 setMethod("collapse", signature = c("Discrete", "factor"),
   function(object, x, ...) {
+    levels(x)[levels(x) == ""] <- "Missing"
     out <- factor(x, exclude=NULL, levels=c(unique(unlist(object@map), NA)))
-    levels(out)[is.na(levels(out))] <- "Missing"
     out[] <- object@map[as.character(x)]
     out
   })

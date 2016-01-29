@@ -55,9 +55,10 @@ setMethod("Bin", signature = "character",
 setMethod("Bin", signature = c(x="Continuous", y="missing"),
   function(x, y, ...) do.call(Bin, modifyList(slots.to.list(x), list(...))))
 
-setMethod("Bin", signature = "data.frame",
-  function(x, y, name, min.iv=0.01, min.cnt=10, min.res=0, max.bin=10, mono=0,
-           exceptions=numeric(0), ...) {
+setMethod("Bin", signature = c(x="data.frame", y="numeric", seg="missing"),
+  function(x, y, seg, min.iv=0.01, min.cnt=10, min.res=0, max.bin=10, mono=0,
+           exceptions=numeric(0)) {
+
     cols <- colnames(x)
     classing <- list()
     for (i in seq_along(cols)) {
@@ -70,4 +71,16 @@ setMethod("Bin", signature = "data.frame",
     new("Classing", classing=classing, y=y)
   })
 
+setMethod("Bin", signature = c(x="data.frame", y="numeric", seg="factor"),
+  function(x, y, seg, min.iv=0.01, min.cnt=10, min.res=0, max.bin=10, mono=0,
+           exceptions=numeric(0)) {
+    ys <- split(y, seg, drop=T)
+    xs <- split(x, seg, drop=T)
+
+    out <- mapply(Bin, xs, ys, MoreArgs = list(
+      min.iv=min.iv, min.cnt=min.cnt, min.res=min.res, max.bin=max.bin,
+      mono=mono, exceptions=exceptions), SIMPLIFY = F)
+
+    new("Segmented-Classing", segmentor=seg, classings=out)
+  })
 

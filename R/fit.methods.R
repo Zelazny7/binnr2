@@ -52,3 +52,10 @@ setMethod("fit", signature = c("canFit", "ANY", "ANY"),
   function(object, data, y, ...) {
     stop("Must provide data and target to fit")
   })
+
+#' @export
+setMethod("fit", signature = c("Segmented-Classing", "missing", "missing"),
+  function(object, data, y, ...) {
+    mods <- lapply(object@classings, fit)
+    new("Segmented-Scorecard", object, scorecards=mods)
+  })
