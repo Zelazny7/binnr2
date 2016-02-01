@@ -54,6 +54,12 @@ exception <- function(Object, val) {
   lr2[1] - lr2[-1]
 }
 
+.ks <- function(score, y) {
+  cml.bds <- cumsum(y[order(-score)] == 1) / sum(y == 1)
+  cml.gds <- cumsum(y[order(-score)] == 0) / sum(y == 0)
+  max(abs(cml.bds - cml.gds))
+}
+
 ## print progress update bar to console
 .progress <- function(i, max, text = "Progress") {
   progress <- paste(rep("=", (10*i/max)), collapse="")

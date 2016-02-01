@@ -8,4 +8,5 @@ setClass("Scorecard",
    fit      = "cv.glmnet",
    coef     = "numeric",
    classing = "Classing",
-   contribution = "numeric"))
+   contribution = "numeric",
+   performance  = "numeric"))

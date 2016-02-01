@@ -12,6 +12,7 @@ Imports:
     glmnet
 Collate:
     'Bin.class.R'
+    'segmented.class.R'
     'allGenerics.R'
     'Bin.methods.R'
     'Scorecard.class.R'
@@ -22,7 +23,5 @@ Collate:
     'imports.R'
     'plot.Bin.R'
     'predict.methods.R'
-    's3generics.R'
-    'segmented.class.R'
     'show.methods.R'
     'util.R'

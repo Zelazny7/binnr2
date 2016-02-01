@@ -1,33 +1,37 @@
 #' @include allGenerics.R
 #' @include Scorecard.class.R
+#' @include segmented.class.R
 
-#' @export
-setMethod("predict", signature = c("Bin"),
+setMethod("predict", signature = c("Bin", "missing"),
   function(object, x, type=c("bins","woe","rcs","dist"), ...) {
-    # browser()
+    callGeneric(object=object, x=object@x, type=type)
+  })
+
+
+setMethod("predict", signature = c("Bin", "ValidBinType"),
+  function(object, x, type=c("bins","woe","rcs","dist"), ...) {
     type <- match.arg(type)
-    if (missing(x)) x <- object@x
     binned <- collapse(object, x)
-    switch(
-      type,
+    switch(type,
       "bins"  = binned,
       "woe"   = object@pred[binned],
       "rcs"   = "Not implemented",
       "dist"  = "Not implemented")
   })
 
-#' @export
-setMethod("predict", signature = c("Classing"),
+setMethod("predict", signature = c(object="Classing", x="missing"),
   function(object, x, type="woe", ...) {
-    ## if no new data is passed in, get it from the classing object
-    if (missing(x)) x <- as.data.frame(object)
+    callGeneric(object=object, x=as.data.frame(object), type=type, ...)
+  })
 
-    stopifnot(is.data.frame(x))
-
-    ## only predict vars that are common to both data and classing
-    vars <- intersect(names(object@classing), colnames(x))
-    if (length(vars) == 0)
-      stop("No vars in common between classing and x", .call=F)
+setMethod("predict", signature = c(object="Classing", x="data.frame"),
+  function(object, x, type="woe", ...) {
+    ## check that all variables are found int he data.frame
+    vars <- names(object@classing)
+    missing.vars <- setdiff(vars, colnames(x))
+    if (length(missing.vars) > 0)
+      stop(sprintf("Classing vars missing from x: %s",
+                   paste(missing.vars, collapse=', ')), .call=F)
 
     out  <- vector("list", length = length(vars))
     names(out) <- vars
@@ -45,7 +49,6 @@ setMethod("predict", signature = c("Classing"),
 
   })
 
-#' @export
 setMethod("predict", signature = c("Scorecard"),
   function(object, x, type="score", ...) {
     if (type == "score") {
@@ -58,15 +61,12 @@ setMethod("predict", signature = c("Scorecard"),
   })
 
 
-### TODO: Add x to predict Generic function
-
-#' @export
 setMethod("predict", signature = c("Segmented-Classing"),
   function(object, x, seg, type="score", ...) {
-    lapply(object@classings, predict, x=x, type=type, ...)
+    mapply(predict, object@classings, split(x, seg),
+           MoreArgs = list(type=type), SIMPLIFY = FALSE)
   })
 
-#' @export
 setMethod("predict", signature = c("Segmented-Scorecard"),
   function(object, x, seg, type="score", ...) {
 

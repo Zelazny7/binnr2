@@ -16,7 +16,7 @@ setGeneric("Bin", valueClass = c("Bin", "Classing", "Segmented", "NULL"),
   })
 
 #' @export
-setGeneric("fit", function(object, data, y, ...) standardGeneric("fit"))
+setGeneric("fit", function(object, x, y, seg, ...) standardGeneric("fit"))
 
 #' @export
 setGeneric("classing", function(object) standardGeneric("classing"))
@@ -24,8 +24,8 @@ setGeneric("classing", function(object) standardGeneric("classing"))
 #' @export
 setGeneric("adjust", function(x) standardGeneric("adjust"))
 
-#' @export
-setGeneric("predict")
+## do not export predict function, only used internally
+setGeneric("predict", function(object, x, ...) standardGeneric("predict"))
 
 #' @export
 setGeneric("plot")

@@ -14,19 +14,20 @@ setMethod("classing", "Scorecard", function(object) {
 
 ## if both are missing then it usese the classing's data and target
 #' @export
-setMethod("fit", signature = c("canFit", "missing", "missing"),
-  function(object, data, y, ...) {
+setMethod("fit", signature = c(object="canFit", x="missing", y="missing"),
+  function(object, x, y, ...) {
     classing <- classing(object)
-    data <- as.data.frame(classing)
-    callGeneric(object=classing, data=data, y=classing@y, ...)
+    x <- as.data.frame(classing)
+    callGeneric(object=object, x=x, y=classing@y, ...)
   })
 
 #' @export
-setMethod("fit", signature = c("Classing", "data.frame", "numeric"),
-  function(object, data, y, nfolds=3, lower.limits=0, upper.limits=3,
+setMethod("fit", signature = c(object="Classing", x="data.frame", y="numeric"),
+  function(object, x, y, nfolds=3, lower.limits=0, upper.limits=3,
            family="binomial", alpha=1, ...) {
-    stopifnot(NROW(data) == NROW(y))
-    woe <- data.matrix(predict(object, x=data, type="woe"))
+
+    stopifnot(NROW(x) == NROW(y))
+    woe <- data.matrix(predict(object, x=x, type="woe"))
     fit <- glmnet::cv.glmnet(woe, y, nfolds=nfolds, lower.limits=lower.limits,
                              upper.limits=upper.limits, family=family,
                              alpha=alpha, ...)
@@ -35,16 +36,19 @@ setMethod("fit", signature = c("Classing", "data.frame", "numeric"),
     coefs <- coefs[coefs != 0]
     contributions <- .contributions(woe[,names(coefs)[-1]], coefs, y)
 
+    ## calculate performance metrics
+    ks <- .ks(woe[,names(coefs)[-1]] %*% coefs[-1] + coefs[1], y)
+
     new("Scorecard", fit=fit, classing=object, y=y, coef=coefs,
-        contribution=contributions)
+        contribution=contributions, performance=ks)
   })
 
 #' @export
 setMethod("fit", signature = c("Scorecard", "data.frame", "numeric"),
-  function(object, data, y, ...) {
-    stopifnot(NROW(data) == NROW(y))
+  function(object, x, y, seg, ...) {
+    stopifnot(NROW(x) == NROW(y))
     classing <- object@classing
-    callGeneric(object=classing, data=data, y=y, ...)
+    callGeneric(object=classing, x=x, y=y, seg=seg, ...)
   })
 
 #' @export
@@ -53,9 +57,47 @@ setMethod("fit", signature = c("canFit", "ANY", "ANY"),
     stop("Must provide data and target to fit")
   })
 
+
+## segmented classing, with factor provided
 #' @export
-setMethod("fit", signature = c("Segmented-Classing", "missing", "missing"),
-  function(object, data, y, ...) {
-    mods <- lapply(object@classings, fit)
-    new("Segmented-Scorecard", object, scorecards=mods)
+setMethod("fit", signature = c("Segmented-Classing", "data.frame", "numeric", "factor"),
+  function(object, x, y, seg, ...) {
+
+    ## check that classing levels are in the same order as classings
+    ord <- match(levels(seg), names(object@classings))
+
+    # TODO: add error message here
+    stopifnot(all(!is.na(ord)))
+
+    xs <- split(x, seg)
+    ys <- split(y, seg)
+
+    mods <- mapply(fit, object@classings[ord], xs, ys, ...)
+
+    new("Segmented-Scorecard", scorecards=mods, segmentor=object@segmentor)
+
   })
+
+#' @export
+setMethod("fit", signature = c(object="Segmented-Classing", x="missing",
+                               y="missing", seg="missing"),
+  function(object, x, y, seg, ...) {
+    mods <- lapply(object@classings, fit, ...)
+    new("Segmented-Scorecard", scorecards=mods, segmentor=object@segmentor)
+  })
+
+#' @export
+setMethod("fit", signature = "Segmented-Scorecard",
+  function(object, x, y, seg, ...) {
+
+    ## create a segmented-classing
+    classings <- lapply(object@scorecards, slot, "classing")
+    classings <- new("Segmented-Classing", classings=classings,
+                     segmentor=object@segmentor)
+
+    callGeneric(classings)
+  })
+
+
+
+

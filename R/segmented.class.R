@@ -8,5 +8,6 @@ setClass("Segmented-Classing", slots=list(
   contains = "Segmented")
 
 setClass("Segmented-Scorecard", slots=list(
-  scorecards="list"),
-  contains = c("Segmented", "Segmented-Classing"))
+  scorecards="list",
+  performance="numeric"),
+  contains = c("Segmented"))
