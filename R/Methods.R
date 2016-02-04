@@ -11,7 +11,7 @@ setMethod("as.data.frame", signature = c("Bin", "missing", "missing"),
     out[sapply(out, is.null)] <- 0
 
     out <- do.call(rbind, out)
-    out[is.infinite(out)] <- 0
+    out[is.infinite(out) | is.nan(out)] <- 0
     out <- cbind(out, Pred=x@pred[row.names(out)])
     row.names(out) <- paste(sprintf("%02d", 1:nrow(out)), row.names(out), sep = ". ")
 
@@ -47,9 +47,10 @@ setMethod("collapse", signature = c("Continuous", "numeric"),
 
 setMethod("collapse", signature = c("Discrete", "factor"),
   function(object, x, ...) {
-    levels(x)[levels(x) == ""] <- "Missing"
-    out <- factor(x, exclude=NULL, levels=c(unique(unlist(object@map), NA)))
-    out[] <- object@map[as.character(x)]
+    levels(x)[levels(x) == ""] <- "Missing" ## account for blank characters
+    out <- factor(x, exclude=NULL, levels=unique(c(unlist(object@map), NA)))
+    out[] <- unlist(object@map)[as.character(x)]
+    levels(out)[is.na(levels(out))] <- "Missing"
     out
   })
 
@@ -77,6 +78,28 @@ setMethod("Update", signature = c("Bin", "missing"),
 setMethod("[", c(x = "Classing", i = "ANY", j = "missing", drop = "ANY"),
   function(x, i, j, ..., drop = TRUE) {
     initialize(x, classing=x@classing[i])
+  })
+
+#' @export
+setMethod("[", c(x = "Scorecard", i = "ANY", j = "missing", drop = "ANY"),
+  function(x, i, j, ..., drop = TRUE) {
+    x@classing[i]
+  })
+
+#' @export
+setMethod("[<-", signature = c(x="Scorecard", i="ANY", j="missing", value="Classing"),
+  function(x, i, j, ..., value) {
+    x@classing[i] <- value
+    x
+  })
+
+#' @export
+setMethod("[<-", signature = c(x="Classing", i="ANY", j="missing", value="Classing"),
+  function(x, i, j, ..., value) {
+    stopifnot(length(i) == length(value))
+    x@classing[i] <- value@classing
+    names(x@classing[i]) <- names(value@classing)
+    x
   })
 
 #' extract element of a Classing

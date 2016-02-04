@@ -1,0 +1,34 @@
+#' @export
+setMethod("summary", "Bin",
+  function(object, ...) {
+    df <- as.data.frame(object)
+    Nex <- if (is(object, "Continuous"))
+      sum(object@x %in% object@exceptions) else NA
+    Nna <- sum(is.na(object@x))
+
+    ## return a data.frame of summary info
+    data.frame(
+      "Type"    = class(object),
+      "Dropped" = if (object@drop) "yes" else "no",
+      "IV"      = df["Total","IV"],
+      "# Bins"  = nrow(df) - 2, # subtract missing & total rows
+      "# Uniq"  = length(unique(object@x)),
+      "Tot N"   = df["Total", "N"],
+      "# Valid" = df["Total", "N"] - Nex - Nna,
+      "# Missing" = Nna,
+      "# Exceptions" = Nex,
+      check.names=F)
+  })
+
+#' @export
+setMethod("summary", "Classing",
+  function(object, ...) {
+    out <- list()
+    for (i in seq_along(object)) {
+      out[[i]] <- summary(object[[i]])
+      .progress(i, length(object), text = "Generating Summary")
+    }
+    cat("\n")
+    s <- do.call(rbind, out)
+    format(s, digits=5, big.mark=",", zero.print=".", scientific=FALSE)
+  })

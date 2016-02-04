@@ -1,10 +1,10 @@
 setClassUnion("ValidBinType", c("numeric", "factor"))
-# setClassUnion("BinType", c("Discrete", "Cont"))
 setClassUnion("cantBin", c("character","logical"))
 
 setClass("Meta", slots = list(
   drop = "logical",
-  new  = "logical"),
+  new  = "logical",
+  history = "list"),
   prototype = prototype(drop=FALSE, new=TRUE),
   contains = "VIRTUAL")
 
@@ -29,7 +29,6 @@ setClass("Bin.opts", slots = list(
 ), contains  = "VIRTUAL")
 
 # Continuous bins use cutpoints and have options controlling the discretization
-#' @export
 setClass("Continuous",
   slots= list(
     cuts   = "numeric"),

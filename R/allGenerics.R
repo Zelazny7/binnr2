@@ -24,8 +24,10 @@ setGeneric("classing", function(object) standardGeneric("classing"))
 #' @export
 setGeneric("adjust", function(x) standardGeneric("adjust"))
 
-## do not export predict function, only used internally
-setGeneric("predict", function(object, x, ...) standardGeneric("predict"))
+#' @export
+setGeneric("drop<-", function(x, value) standardGeneric("drop<-"))
+
+setGeneric(".predict", function(object, x, type="woe", seg, ...) standardGeneric(".predict"))
 
 #' @export
 setGeneric("plot")
@@ -35,3 +37,7 @@ setGeneric("as.data.frame")
 
 #' @export
 setGeneric("c")
+
+#' @export
+setGeneric("summary")
+

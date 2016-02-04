@@ -27,7 +27,7 @@ setMethod("fit", signature = c(object="Classing", x="data.frame", y="numeric"),
            family="binomial", alpha=1, ...) {
 
     stopifnot(NROW(x) == NROW(y))
-    woe <- data.matrix(predict(object, x=x, type="woe"))
+    woe <- data.matrix(.predict(object, x=x, type="woe"))
     fit <- glmnet::cv.glmnet(woe, y, nfolds=nfolds, lower.limits=lower.limits,
                              upper.limits=upper.limits, family=family,
                              alpha=alpha, ...)
@@ -74,7 +74,12 @@ setMethod("fit", signature = c("Segmented-Classing", "data.frame", "numeric", "f
 
     mods <- mapply(fit, object@classings[ord], xs, ys, ...)
 
-    new("Segmented-Scorecard", scorecards=mods, segmentor=object@segmentor)
+    score <- do.call(c, lapply(mods, predict))
+    y     <- do.call(c, lapply(mods, function(z) z@classing@y))
+    perf  <- .ks(-score, y)
+
+    new("Segmented-Scorecard", scorecards=mods, segmentor=object@segmentor,
+        performance=perf)
 
   })
 
@@ -83,7 +88,14 @@ setMethod("fit", signature = c(object="Segmented-Classing", x="missing",
                                y="missing", seg="missing"),
   function(object, x, y, seg, ...) {
     mods <- lapply(object@classings, fit, ...)
-    new("Segmented-Scorecard", scorecards=mods, segmentor=object@segmentor)
+
+    ## loop over all scorecards and get the prediction and response
+    score <- do.call(c, lapply(mods, predict))
+    y     <- do.call(c, lapply(mods, function(z) z@classing@y))
+    perf  <- .ks(-score, y)
+
+    new("Segmented-Scorecard", scorecards=mods, segmentor=object@segmentor,
+        performance=perf)
   })
 
 #' @export

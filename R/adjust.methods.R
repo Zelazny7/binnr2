@@ -93,7 +93,8 @@ setMethod("adjust", "Classing",
           }
         }
       } else if (command == "d") {
-        slot(x[[i]], "drop") <- !slot(x[[i]], "drop")
+        drop(x[[i]]) <- !slot(x[[1]], "drop")
+        # slot(x[[i]], "drop") <- !slot(x[[i]], "drop")
       } else if (command == "m") {
         cat("Enter Monotonicity:")
         v <- as.numeric(readLines(n = 1))
