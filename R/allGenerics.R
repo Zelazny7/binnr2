@@ -11,7 +11,7 @@ setGeneric("Bin", valueClass = c("Bin", "Classing", "Segmented", "NULL"),
   function(x, y, seg, name="NONE", ...) {
     ## Checks for the size
     stopifnot(NROW(x) > 0)
-    stopifnot(NROW(x) == NROW(y))
+    if (!missing(y)) stopifnot(NROW(x) == NROW(y))
     standardGeneric("Bin")
   })
 
@@ -25,7 +25,10 @@ setGeneric("classing", function(object) standardGeneric("classing"))
 setGeneric("adjust", function(x) standardGeneric("adjust"))
 
 #' @export
-setGeneric("drop<-", function(x, value) standardGeneric("drop<-"))
+setGeneric("set.meta.attr", function(x, value, .slot) standardGeneric("set.meta.attr"))
+
+#' @export
+setGeneric("get.meta.attr", function(x, .slot) standardGeneric("get.meta.attr"))
 
 setGeneric(".predict", function(object, x, type="woe", seg, ...) standardGeneric(".predict"))
 

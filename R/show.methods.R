@@ -32,15 +32,32 @@ setMethod("show", signature = "Scorecard",
     out <- merge(object@coef[-1], object@contribution, by=0, all=T)
     rownames(out) <- out$Row.names
     out$Row.names <- NULL
-    out <- head(with(out, out[order(-out[,2]),]), 5)
+    out <- with(out, out[order(-out[,2]),])
+
 
     cnt <- out[,2]/max(out[,2]) * 10
     out[,3] <- sapply(cnt, function(i) paste(rep("*", i), collapse=""))
     out[,3] <- format(out[,3], justify = "left")
-    colnames(out) <- c("Coefficient", "Contribution", "Importance")
+
+    out <- cbind(ifelse(.new(object@classing[names(object@coef)[-1]]), "N", ""),
+                 out)
+
+    colnames(out) <- c("New", "Coefficient", "Contribution", "Importance")
     cat("\n")
     print(out)
-    cat("...\n")
+  })
+
+setMethod("show", signature = "Segmented-Classing",
+  function(object) {
+    cat("Segmented-Classing object\n")
+    cat(sprintf("  |-- %5d segments\n", length(levels(object@segmentor))))
+
+    ## loop over segments and show
+    for (seg in levels(object@segmentor)) {
+      border <- paste(c("+", rep("-", nchar(seg) + 11), "+"), collapse="")
+      cat(sprintf("\n%2$s\n| Segment: %s |\n%2$s\n", seg, border))
+      show(object@classings[[seg]])
+    }
   })
 
 setMethod("show", signature = "Segmented-Scorecard",

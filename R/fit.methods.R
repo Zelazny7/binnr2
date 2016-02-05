@@ -23,18 +23,35 @@ setMethod("fit", signature = c(object="canFit", x="missing", y="missing"),
 
 #' @export
 setMethod("fit", signature = c(object="Classing", x="data.frame", y="numeric"),
-  function(object, x, y, nfolds=3, lower.limits=0, upper.limits=3,
+  function(object, x, y, fixed=FALSE, nfolds=3, lower.limits=0, upper.limits=3,
            family="binomial", alpha=1, ...) {
 
     stopifnot(NROW(x) == NROW(y))
-    woe <- data.matrix(.predict(object, x=x, type="woe"))
+
+    ## get vector of keep vars
+    k <- !dropped(object)
+    woe <- data.matrix(.predict(object[k], x=x, type="woe"))
+
+    ## set the penalty factor for fixed vars
+    im <- inmodel(object)
+    pf <- rep(1, length(object))
+    if (fixed) pf[im] <- 0
+
     fit <- glmnet::cv.glmnet(woe, y, nfolds=nfolds, lower.limits=lower.limits,
                              upper.limits=upper.limits, family=family,
-                             alpha=alpha, ...)
+                             alpha=alpha, penalty.factor = pf[k], ...)
 
     coefs <- coef(fit, s="lambda.min")[,1]
     coefs <- coefs[coefs != 0]
     contributions <- .contributions(woe[,names(coefs)[-1]], coefs, y)
+
+    ## flag vars as in the model
+    inmodel(object) <- FALSE
+    inmodel(object[names(coefs)[-1]]) <- TRUE
+
+    ## flag the new vars
+    new(object) <- FALSE
+    new(object[which(!im & inmodel(object))]) <- TRUE
 
     ## calculate performance metrics
     ks <- .ks(woe[,names(coefs)[-1]] %*% coefs[-1] + coefs[1], y)
@@ -45,10 +62,10 @@ setMethod("fit", signature = c(object="Classing", x="data.frame", y="numeric"),
 
 #' @export
 setMethod("fit", signature = c("Scorecard", "data.frame", "numeric"),
-  function(object, x, y, seg, ...) {
+  function(object, x, y, fixed = FALSE, ...) {
     stopifnot(NROW(x) == NROW(y))
     classing <- object@classing
-    callGeneric(object=classing, x=x, y=y, seg=seg, ...)
+    callGeneric(object=classing, x=x, y=y, fixed=fixed, ...)
   })
 
 #' @export

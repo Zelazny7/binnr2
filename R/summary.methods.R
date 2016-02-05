@@ -2,15 +2,16 @@
 setMethod("summary", "Bin",
   function(object, ...) {
     df <- as.data.frame(object)
+
     Nex <- if (is(object, "Continuous"))
-      sum(object@x %in% object@exceptions) else NA
+      sum(object@x %in% object@exceptions) else 0
     Nna <- sum(is.na(object@x))
 
     ## return a data.frame of summary info
     data.frame(
       "Type"    = class(object),
       "Dropped" = if (object@drop) "yes" else "no",
-      "IV"      = df["Total","IV"],
+      "IV"      = sprintf("%1.3f", df["Total","IV"]),
       "# Bins"  = nrow(df) - 2, # subtract missing & total rows
       "# Uniq"  = length(unique(object@x)),
       "Tot N"   = df["Total", "N"],
@@ -25,7 +26,7 @@ setMethod("summary", "Classing",
   function(object, ...) {
     out <- list()
     for (i in seq_along(object)) {
-      out[[i]] <- summary(object[[i]])
+      out[[object[[i]]@name]] <- summary(object[[i]])
       .progress(i, length(object), text = "Generating Summary")
     }
     cat("\n")

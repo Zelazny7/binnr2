@@ -2,10 +2,11 @@ setClassUnion("ValidBinType", c("numeric", "factor"))
 setClassUnion("cantBin", c("character","logical"))
 
 setClass("Meta", slots = list(
-  drop = "logical",
-  new  = "logical",
+  drop    = "logical",
+  inmodel = "logical",
+  new     = "logical",
   history = "list"),
-  prototype = prototype(drop=FALSE, new=TRUE),
+  prototype = prototype(drop=FALSE, inmodel=FALSE, new=FALSE),
   contains = "VIRTUAL")
 
 ## virtual class contained by all bins
