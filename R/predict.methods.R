@@ -3,6 +3,14 @@
 #' @include segmented.class.R
 
 setClassUnion("Predictable", c("Bin", "Classing", "Scorecard", "Segmented"))
+setClassUnion("NullOrDF", c("NULL","data.frame"))
+
+
+setAs("Segmented-Scorecard", "Segmented-Classing",
+  function(from) {
+    classings <- lapply(from@scorecards, slot, "classing")
+    new("Segmented-Classing", classings=classings, segmentor=from@segmentor)
+  })
 
 #' @export
 setMethod("predict", "Predictable", function(object, ...) {
@@ -29,8 +37,10 @@ setMethod(".predict", signature = c(object="Classing", x="missing"),
     callGeneric(object=object, x=as.data.frame(object), type=type, ...)
   })
 
-setMethod(".predict", signature = c(object="Classing", x="data.frame"),
+setMethod(".predict", signature = c(object="Classing", x="NullOrDF"),
   function(object, x, type="woe", ...) {
+    if (is.null(x)) return(x)
+
     ## check that all variables are found int he data.frame
     vars <- names(object@classing)
     missing.vars <- setdiff(vars, colnames(x))
@@ -72,30 +82,47 @@ setMethod(".predict", signature = c("Scorecard", "data.frame"),
     callGeneric(object@classing, x=x, type=type, ...)
   })
 
-setMethod(".predict", signature = c("Segmented-Scorecard", "missing"),
+setMethod(".predict", signature = c("Segmented-Classing", "missing"),
+  function(object, x, type, seg, ...) {
+    lapply(object@classings, predict, type=type)
+  })
+
+setMethod(".predict", signature = c("Segmented-Classing", x="data.frame", seg="factor"),
+  function(object, x, type, seg, ...) {
+    ## check levels exist
+    stopifnot(all(levels(seg) %in% levels(object@segmentor)))
+    lv <- levels(seg)
+    xs <- split(x, seg, drop=TRUE)
+    mapply(predict, object@classings[lv], xs[lv],
+           MoreArgs = c(type=type, list(...)), SIMPLIFY = F)
+  })
+
+setMethod(".predict", signature = c(object="Segmented", x="ANY", seg="ANY"),
+  function(object, x, type="score", seg, ...) {
+    stop("Predicting segmented objects require data and segment be provided OR both missing")
+  })
+
+setMethod(".predict", signature = c(object="Segmented-Scorecard", x="missing", seg="missing"),
   function(object, x, type="score", seg, ...) {
     if (type == "score") {
       out <- lapply(object@scorecards, .predict, type=type, ...)
       unsplit(out, object@segmentor)
     } else {
-      ## should call the segmented-classing predict function
-      callNextMethod()
+      callGeneric(as(object, "Segmented-Classing"), type=type, ...)
     }
   })
 
-
-setMethod(".predict", signature = c("Segmented-Scorecard"),
+setMethod(".predict", signature = c(object="Segmented-Scorecard", x="data.frame", seg="factor"),
   function(object, x, type="score", seg, ...) {
-
     if (type == "score") {
       out <- lapply(object@scorecards, .predict, x=x, type=type, ...)
-      if (missing(seg)) seg <- object@segmentor
+      # if (missing(seg)) seg <- object@segmentor
 
       ## create matrix for indexing scores
       idx <- cbind(seq_along(seg), match(seg, names(out)))
       do.call(cbind, out)[idx]
     } else {
-      ## should call the segmented-classing predict function
-      callNextMethod()
+      callGeneric(as(object, "Segmented-Classing"), x=x, type=type, seg=seg, ...)
     }
   })
+
