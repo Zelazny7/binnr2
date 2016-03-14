@@ -4,10 +4,10 @@
 setMethod("adjust", "Segmented-Scorecard",
   function(x) {
     choices <- c(names(x@scorecards))
-    i <- menu(choices, graphics = TRUE, title = "Select Segment")
+    i <- menu(choices, graphics = FALSE, title = "Select Segment")
     while(i) {
       x@scorecards[[i]] <- adjust(x@scorecards[[i]])
-      i <- menu(choices, graphics = TRUE, title = "Select Segment")
+      i <- menu(choices, graphics = FALSE, title = "Select Segment")
     }
     x
   })
@@ -16,10 +16,10 @@ setMethod("adjust", "Segmented-Scorecard",
 setMethod("adjust", "Segmented-Classing",
   function(x) {
     choices <- c(names(x@classings))
-    i <- menu(choices, graphics = TRUE, title = "Select Segment")
+    i <- menu(choices, graphics = FALSE, title = "Select Segment")
     while(i) {
       x@classings[[i]] <- adjust(x@classings[[i]])
-      i <- menu(choices, graphics = TRUE, title = "Select Segment")
+      i <- menu(choices, graphics = FALSE, title = "Select Segment")
     }
     x
   })
@@ -82,7 +82,8 @@ setMethod("adjust", "Classing",
         # }
       } else if (command == "g") {
         cat("Select a variable:")
-        i <- menu(names(x@classing), graphics=TRUE, title = "Select Variable")
+        choice <- menu(names(x@classing), graphics=FALSE, title = "Select Variable")
+        if (choice > 0) i <- choice
       } else if (command == "d") {
         drop(x[[i]]) <- !slot(x[[i]], "drop")
       } else if (command == "m") {
