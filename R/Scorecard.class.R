@@ -1,6 +1,6 @@
 setOldClass("cv.glmnet")
 
-#' @include Bin.class.R
+#' @include bin.class.R
 #' @export
 setClass("Scorecard",
   slots=list(

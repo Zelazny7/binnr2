@@ -1,4 +1,4 @@
-#' @include Bin.class.R
+#' @include bin.class.R
 
 #' @export
 setMethod("adjust", "Segmented-Scorecard",

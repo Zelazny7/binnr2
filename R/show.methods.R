@@ -1,4 +1,4 @@
-#' @include Scorecard.class.R Bin.class.R
+#' @include Scorecard.class.R bin.class.R
 
 setMethod("show", signature = "Bin",
   function(object) {
