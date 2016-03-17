@@ -1,4 +1,4 @@
-#' @include Bin.class.R segmented.class.R
+#' @include bin.class.R segmented.class.R
 
 #' @export
 setGeneric("collapse", function(object, x, ...) standardGeneric("collapse"))

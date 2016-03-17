@@ -1,4 +1,4 @@
-#' @include Bin.class.R
+#' @include bin.class.R
 
 #' @export
 setAs("Classing", "list", def = function(from) from@classing)

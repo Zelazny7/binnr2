@@ -11,7 +11,7 @@ RoxygenNote: 5.0.1
 Imports:
     glmnet
 Collate:
-    'Bin.class.R'
+    'bin.class.R'
     'segmented.class.R'
     'allGenerics.R'
     'Bin.methods.R'
@@ -24,6 +24,7 @@ Collate:
     'imports.R'
     'plot.Bin.R'
     'predict.methods.R'
+    'shinyapp.R'
     'show.methods.R'
     'summary.methods.R'
     'util.R'

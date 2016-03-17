@@ -1,4 +1,4 @@
-#' @include Bin.class.R
+#' @include bin.class.R
 
 setClass("Segmented", slots=list(
   segmentor  = "factor"), contains = "VIRTUAL")
