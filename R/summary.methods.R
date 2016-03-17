@@ -18,7 +18,7 @@ setMethod("summary", "Bin",
       "# Valid" = df["Total", "N"] - Nex - Nna,
       "# Missing" = Nna,
       "# Exceptions" = Nex,
-      check.names=F)
+      check.names=F, stringsAsFactors=F)
   })
 
 #' @export
