@@ -24,7 +24,6 @@ Collate:
     'imports.R'
     'plot.Bin.R'
     'predict.methods.R'
-    'shinyapp.R'
     'show.methods.R'
     'summary.methods.R'
     'util.R'

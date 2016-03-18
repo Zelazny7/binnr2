@@ -31,7 +31,7 @@ setMethod("Bin", signature = "factor",
     # sort the factor levels by bad rate and bin as if numeric
     m <- order(tapply(y, x, mean))
     names(m) <- levels(x)
-    b <- Bin(m[x], y, name = name, mono=0, exceptions=NULL, ...)
+    b <- Bin(m[x], y, name = name, ...)
     grps <- tapply(m, cut(m, b@cuts), names)
 
     # take the numeric cut points and map back to original factor levels
