@@ -7,7 +7,10 @@ setMethod("as.data.frame", signature = c("Bin", "missing", "missing"),
     f <- !is.na(x@x)
 
     ## get the bivariate matrix
-    out <- tapply(x@y, binned, .bv, Y=x@y, f=f, simplify = TRUE)
+    # out <- tapply(x@y, binned, .bv, Y=x@y, f=f, simplify = TRUE)
+    out <- mapply(.bv2, split(x@y, binned), split(x@w, binned),
+                  MoreArgs = list(Y=x@y, W=x@w, f=f), SIMPLIFY = FALSE)
+
     out[sapply(out, is.null)] <- 0
 
     out <- do.call(rbind, out)

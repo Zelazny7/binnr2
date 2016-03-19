@@ -14,6 +14,7 @@ setClass("Bin", slots = list(
   name = "character",
   x    = "ValidBinType",
   y    = "numeric",
+  w    = "numeric",
   woe  = "numeric",
   rcs  = "character",
   pred = "numeric"),
@@ -44,7 +45,8 @@ setClass("Discrete",
 setClass("Classing",
   slots = list(
     classing = "list",
-    y        = "numeric"),
+    y        = "numeric",
+    w        = "numeric"),
   validity = function(object) {
     if (all(sapply(object@classing, is, "Bin"))) TRUE
     else "All members of a Classing object must be Bin objects"

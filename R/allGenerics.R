@@ -8,7 +8,7 @@ setGeneric("Update", function(object, keep = TRUE, ...) standardGeneric("Update"
 
 #' @export
 setGeneric("Bin", valueClass = c("Bin", "Classing", "Segmented", "NULL"),
-  function(x, y, seg, name="NONE", ...) {
+  function(x, y, w, seg, name="NONE", ...) {
     ## Checks for the size
     stopifnot(NROW(x) > 0)
     if (!missing(y)) stopifnot(NROW(x) == NROW(y))
@@ -16,7 +16,7 @@ setGeneric("Bin", valueClass = c("Bin", "Classing", "Segmented", "NULL"),
   })
 
 #' @export
-setGeneric("fit", function(object, x, y, seg, ...) standardGeneric("fit"))
+setGeneric("fit", function(object, x, y, w, seg, ...) standardGeneric("fit"))
 
 #' @export
 setGeneric("classing", function(object) standardGeneric("classing"))

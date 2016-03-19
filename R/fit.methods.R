@@ -37,7 +37,8 @@ setMethod("fit", signature = c(object="Classing", x="data.frame", y="numeric"),
     pf <- rep(1, length(object))
     if (fixed) pf[im] <- 0
 
-    fit <- glmnet::cv.glmnet(woe, y, nfolds=nfolds, lower.limits=lower.limits,
+    fit <- glmnet::cv.glmnet(woe, y, weights=object@w, nfolds=nfolds,
+                             lower.limits=lower.limits,
                              upper.limits=upper.limits, family=family,
                              alpha=alpha, penalty.factor = pf[k], ...)
 
@@ -77,8 +78,8 @@ setMethod("fit", signature = c("canFit", "ANY", "ANY"),
 
 ## segmented classing, with factor provided
 #' @export
-setMethod("fit", signature = c("Segmented-Classing", "data.frame", "numeric", "factor"),
-  function(object, x, y, seg, ...) {
+setMethod("fit", signature = c(object="Segmented-Classing", x="data.frame", y="numeric", seg="factor"),
+  function(object, x, y, w, seg, ...) {
 
     ## check that classing levels are in the same order as classings
     ord <- match(levels(seg), names(object@classings))
@@ -103,7 +104,7 @@ setMethod("fit", signature = c("Segmented-Classing", "data.frame", "numeric", "f
 #' @export
 setMethod("fit", signature = c(object="Segmented-Classing", x="missing",
                                y="missing", seg="missing"),
-  function(object, x, y, seg, ...) {
+  function(object, x, y, w, seg, ...) {
     mods <- lapply(object@classings, fit, ...)
 
     ## loop over all scorecards and get the prediction and response

@@ -16,6 +16,17 @@ slots.to.list <- function(s4) {
   c(N=length(y), N1, N0, PN=length(y)/length(Y), P1, P0, N1/length(y), WoE, IV)
 }
 
+# weighted version of .bv
+.bv2 <- function(y, w, Y, W, f) {
+  N1  <- sum((y == 1) * w)
+  N0  <- sum((y == 0) * w)
+  P1  <- N1/sum((Y[f] == 1) * W[f])
+  P0  <- N0/sum((Y[f] == 0) * W[f])
+  WoE <- log(P1 / P0)
+  IV  <- (P1 - P0) * WoE
+  c(N=sum(w), N1, N0, PN=sum(w)/sum(W), P1, P0, N1/sum(w), WoE, IV)
+}
+
 #' @export
 mono <- function(Object, val) {
   val <- if(val %in% c(-1,0,1,2)) val else 0

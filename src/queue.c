@@ -60,7 +60,7 @@ void release_queue(struct queue* q) {
         temp = q->first;
     }
     free(q);
-};
+}
 
 int queue_size(struct queue *q) {
     // printf("Queue size in size func: %d\n", q->size);

@@ -20,7 +20,7 @@ struct split {
 };
 
 // create and initiazlize the xtab
-struct xtab* xtab_factory(struct variable* v, double* y);
+struct xtab* xtab_factory(struct variable* v, double* y, double* w);
 
 // get a flag of unique values for the variable
 size_t* create_unique_flag(struct variable* v);
