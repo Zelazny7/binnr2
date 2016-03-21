@@ -16,7 +16,10 @@ setMethod("as.data.frame", signature = c("Bin", "missing", "missing"),
     out <- do.call(rbind, out)
     out[is.infinite(out) | is.nan(out)] <- 0
     out <- cbind(out, Pred=x@pred[row.names(out)])
-    row.names(out) <- paste(sprintf("%02d", 1:nrow(out)), row.names(out), sep = ". ")
+
+    rn <- row.names(out)
+    rn <- ifelse(nchar(rn) > 20, paste0(strtrim(rn, 17), "..."), rn)
+    row.names(out) <- paste(sprintf("%02d", 1:nrow(out)), rn, sep = ". ")
 
     ## calculate totals
     Total <- apply(out, 2, sum, na.rm=T)

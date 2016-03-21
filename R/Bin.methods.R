@@ -26,7 +26,8 @@ setMethod("Bin", signature = c(x="numeric", y="numeric", w="numeric"),
   })
 
 setMethod("Bin", signature = c(x="factor", y="numeric", w="numeric"),
-  function(x, y, w, name = "NONE", ...) {
+  function(x, y, w, name = "NONE", min.iv=0.01, min.cnt=10, min.res=0, max.bin=10,
+           mono=0, exceptions=numeric(0), ...) {
     ## create a mapping of raw values to collapsed values, store in "map"
     ## check for factor levels that create issues
     if (any(levels(x) == "")) {
@@ -36,19 +37,23 @@ setMethod("Bin", signature = c(x="factor", y="numeric", w="numeric"),
         call.=F)
     }
 
-    # sort the factor levels by bad rate and bin as if numeric
-    m <- rev(order(tapply(y, x, mean)))
-    names(m) <- levels(x)
-    b <- Bin(m[x], y, w, name = name, ...)
-    grps <- tapply(m, cut(m, b@cuts), names)
+    mono <- 0 # monotonic factors doesn't make sense
 
-    # take the numeric cut points and map back to original factor levels
-    map <- grps[sapply(paste0("\\b", levels(x), "\\b"), grep, grps)]
+    ## sort the factor levels by bad rate and bin as if numeric
+    x <- factor(x, levels(x)[order(-tapply(y, x, mean))])
+
+    b <- Bin(as.numeric(x), y, w, name=name, min.iv=min.iv, min.cnt=min.cnt,
+             min.res=min.res, max.bin=max.bin, mono=mono, exceptions=exceptions, ...)
+
+    grps <- split(levels(x), cut(seq_along(levels(x)), b@cuts))
+
+    ## take the numeric cut points and map back to original factor levels
+    map <- grps[cut(seq_along(levels(x)), b@cuts)]
     map <- lapply(map, paste, collapse=",")
     names(map) <- levels(x)
 
     out <- new("Discrete", x=x, y=y, w=w, map=map, name=name)
-    # get the binned levels and map to woe predictions
+    ## get the binned levels and map to woe predictions
     Update(out)
   })
 
