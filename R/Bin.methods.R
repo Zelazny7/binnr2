@@ -18,7 +18,7 @@ setMethod("Bin", signature = c(x="numeric", y="numeric", w="numeric"),
                   as.integer(min.res), as.integer(max.bin),
                   as.integer(mono), as.double(exceptions))
 
-    out <- new("Continuous", x=x, y=y, w=w, cuts=cuts, min.iv=min.iv,
+    out <- new("continuous", x=x, y=y, w=w, cuts=cuts, min.iv=min.iv,
                min.cnt=min.cnt, min.res=min.res, max.bin=max.bin, mono=mono,
                exceptions=exceptions, name = name)
     # get the binned levels and map to woe predictions

@@ -11,7 +11,7 @@ setMethod("show", signature = "Bin",
 
 setMethod("show", signature = "Classing",
   function(object) {
-    lvls <- c("Discrete", "Continuous")
+    lvls <- c("Discrete", "continuous")
     cnts <- table(factor(sapply(object@classing, class), levels=lvls))
     ndrop <- sum(sapply(object@classing, slot, "drop"))
     cat("Classing object\n")

@@ -5,7 +5,15 @@ setMethod("Ops", c("Bin", "numeric"),
     callGeneric(e1=e1, e2=e2)
   })
 
-setMethod("-", signature = c("Continuous", "numeric"),
+setMethod("!=", signature = c("Bin", "numeric"),
+  function(e1, e2) {
+    e1@history[[1]] <- e1
+    e2 <- pmax(pmin(e2, length(e1@pred)), 1)
+    e1@pred[e2] <- 0
+    Update(e1)
+  })
+
+setMethod("-", signature = c("continuous", "numeric"),
   function(e1, e2) {
     if (!all(diff(e2)==1)) return(e1)
     e1@history[[1]] <- e1
@@ -15,7 +23,7 @@ setMethod("-", signature = c("Continuous", "numeric"),
     Update(e1)
   })
 
-setMethod("+", signature = c("Continuous", "numeric"),
+setMethod("+", signature = c("continuous", "numeric"),
   function(e1, e2) {
     f <- ! (is.na(e1@x) | e1@x %in% e1@exceptions)
 
@@ -57,8 +65,9 @@ setMethod("-", signature = c("Discrete", "numeric"),
 ## set pred value equal to another
 #' @export
 set.equal <- function(b, v1, v2) {
+  b@history[[1]] <- b
   b@pred[v1] <- b@pred[v2]
-  b
+  Update(b)
 }
 
 

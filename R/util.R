@@ -30,7 +30,9 @@ slots.to.list <- function(s4) {
 #' @export
 mono <- function(Object, val) {
   val <- if(val %in% c(-1,0,1,2)) val else 0
-  Bin(x=Object, mono=val)
+  b <- Bin(x=Object, mono=val)
+  b@history[[1]] <- Object
+  b
 }
 
 #' @export
@@ -40,7 +42,7 @@ reset <- function(Object) {
 
 #' @export
 exception <- function(Object, val) {
-  stopifnot(is(Object, "Continuous"))
+  stopifnot(is(Object, "continuous"))
   stopifnot(is.numeric(val))
   Bin(x=Object, exceptions=val)
 }

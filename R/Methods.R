@@ -40,7 +40,7 @@ setMethod("as.data.frame", signature = c("Classing", "missing", "missing"),
 setMethod("collapse", signature = c("Bin", "missing"),
   function(object, x, ...) callGeneric(object, object@x))
 
-setMethod("collapse", signature = c("Continuous", "numeric"),
+setMethod("collapse", signature = c("continuous", "numeric"),
   function(object, x, ...) {
     f <- !is.na(x) & !(x %in% object@exceptions)
     bins <- cut(x[f], object@cuts, include.lowest = T, dig.lab=3)

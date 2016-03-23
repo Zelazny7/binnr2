@@ -31,7 +31,7 @@ setClass("Bin.opts", slots = list(
 ), contains  = "VIRTUAL")
 
 # Continuous bins use cutpoints and have options controlling the discretization
-setClass("Continuous",
+setClass("continuous",
   slots= list(
     cuts   = "numeric"),
   contains = c("Bin", "Bin.opts"))

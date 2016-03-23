@@ -3,7 +3,7 @@ setMethod("summary", "Bin",
   function(object, ...) {
     df <- as.data.frame(object)
 
-    Nex <- if (is(object, "Continuous"))
+    Nex <- if (is(object, "continuous"))
       sum(object@x %in% object@exceptions) else 0
     Nna <- sum(is.na(object@x))
 

@@ -45,7 +45,5 @@ setMethod("plot", signature = "Bin", definition = function(x, y, ...) {
          fill = cold.day.palette, horiz=T, inset = c(0,0), xpd=T, cex = 0.75,
          pt.cex = 0.8)
 
-
-
   par(old.par)
 })
