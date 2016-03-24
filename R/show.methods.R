@@ -3,10 +3,20 @@
 setMethod("show", signature = "Bin",
   function(object) {
     df <- as.data.frame(object)
+
     # iv <- df['Total', "IV"]
-    cat(sprintf("\n> %-20s | drop: %5s", object@name, as.character(object@drop)),
-        sep = '\n')
-    print(df, digits=5)
+    cat(sprintf("\n%-32s\nDropped [%1s] | In Model [%1s] | New [%1s]\n",
+                object@name,
+                ifelse(object@drop, "y", "n"),
+                ifelse(object@inmodel, "y", "n"),
+                ifelse(object@new, "y", "n")), sep = '\n')
+
+    # make the bin look pretty
+    df <- cbind(
+      lapply(df[,1:3], prettyNum, big.mark = ',', scientific=FALSE),
+      format(df[,4:7] , digits=2, scientific=FALSE),
+      format(df[,8:10], digits=5, scientific=FALSE))
+    print(df)
   })
 
 setMethod("show", signature = "Classing",

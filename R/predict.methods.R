@@ -66,7 +66,7 @@ setMethod(".predict", signature = c(object="Classing", x="NullOrDF"),
 setMethod(".predict", signature = c("Scorecard", "missing"),
   function(object, x, type="score", seg, ...) {
     x <- as.data.frame(object@classing)
-    callGeneric(object=object, x=x, type, ...)
+    callGeneric(object=object, x=x, type=type, ...)
   })
 
 setMethod(".predict", signature = c("Scorecard", "data.frame"),

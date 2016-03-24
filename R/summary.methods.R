@@ -31,5 +31,7 @@ setMethod("summary", "Classing",
     }
     cat("\n")
     s <- do.call(rbind, out)
-    format(s, digits=5, big.mark=",", zero.print=".", scientific=FALSE)
+    format(s, digits=9, big.mark=",", zero.print=".", scientific=FALSE)
   })
+
+
