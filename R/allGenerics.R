@@ -1,9 +1,6 @@
 #' @include bin.class.R segmented.class.R
 
 #' @export
-setGeneric("drop<-", function(x, value) standardGeneric("drop<-"))
-
-#' @export
 setGeneric("collapse", function(object, x, ...) standardGeneric("collapse"))
 
 #' @export

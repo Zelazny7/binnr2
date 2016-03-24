@@ -149,12 +149,3 @@ setMethod("c", signature = c("Combinable"),
 
 #' @export
 setMethod("length", "Classing", function(x) length(x@classing))
-
-#' @export
-setMethod("drop<-", "Classing", function(x, value) {
-  for (v in value) {
-    x[v] <- set.meta.attr(x[v], value = TRUE, .slot = "drop")
-  }
-  x
-})
-
