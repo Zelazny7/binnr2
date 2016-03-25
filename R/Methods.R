@@ -37,6 +37,14 @@ setMethod("as.data.frame", signature = c("Classing", "missing", "missing"),
    data.frame(data)
  })
 
+setMethod("as.data.frame", signature = c("Scorecard", "missing", "missing"),
+  function(x, row.names = NULL, optional = FALSE, ...) {
+    data.frame(
+      row.names=names(x@coef[-1]),
+      Contribution=x@contribution,
+      Coefficients=x@coef[-1])
+  })
+
 setMethod("collapse", signature = c("Bin", "missing"),
   function(object, x, ...) callGeneric(object, object@x))
 
