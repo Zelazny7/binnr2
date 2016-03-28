@@ -59,12 +59,15 @@ setMethod("collapse", signature = c("continuous", "numeric"),
     out
   })
 
+#TODO: Add checks that levels are the same as when developed!!
 setMethod("collapse", signature = c("Discrete", "factor"),
   function(object, x, ...) {
-    levels(x)[levels(x) == ""] <- "Missing" ## account for blank characters
-    out <- factor(x, exclude=NULL, levels=unique(c(unlist(object@map), NA)))
-    out[] <- unlist(object@map)[as.character(x)]
+    levels(x)[levels(x) == ""] <- "Missing"
+    out <- x
+    levels(out) <- unlist(object@map)
+    out <- addNA(out)
     levels(out)[is.na(levels(out))] <- "Missing"
+    out[is.na(out)] <- "Missing"
     out
   })
 
