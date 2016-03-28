@@ -30,7 +30,7 @@ setMethod("Bin", signature = c(x="factor", y="numeric", w="numeric"),
            mono=0, exceptions=numeric(0), ...) {
     ## create a mapping of raw values to collapsed values, store in "map"
     ## check for factor levels that create issues
-    if (any(levels(x) == "")) {
+    if (any(levels(x) == "", na.rm=TRUE)) {
       levels(x)[which(levels(x) == "")] <- "Missing"
       warning(
         sprintf("Factor levels \"\" replaced with \"Missing\" for %s", name),

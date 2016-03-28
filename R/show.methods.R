@@ -39,18 +39,19 @@ setMethod("show", signature = "Scorecard",
 
     ## print a little var importance table
     cat("\nVariable Contribution:\n")
-    out <- merge(object@coef[-1], object@contribution, by=0, all=T)
+    out <- merge(object@contribution, object@coef[-1], by=0, all=T)
     rownames(out) <- out$Row.names
     out$Row.names <- NULL
-    out <- with(out, out[order(-out[,2]),])
 
 
-    cnt <- out[,2]/max(out[,2]) * 10
+    cnt <- out[,1]/max(out[,1]) * 10
     out[,3] <- sapply(cnt, function(i) paste(rep("*", i), collapse=""))
     out[,3] <- format(out[,3], justify = "left")
 
-    out <- cbind(ifelse(.new(object@classing[names(object@coef)[-1]]), "N", ""),
-                 out)
+    out <- cbind(New=ifelse(.new(object@classing[names(object@contribution)]),
+                        "N", ""), out)
+
+    out <- out[order(-out[,3]),]
 
     colnames(out) <- c("New", "Coefficient", "Contribution", "Importance")
     cat("\n")
