@@ -64,7 +64,7 @@ setMethod("collapse", signature = c("Discrete", "factor"),
   function(object, x, ...) {
     levels(x)[levels(x) == ""] <- "Missing"
     out <- x
-    levels(out) <- unlist(object@map)
+    levels(out) <- unlist(object@map)[levels(out)]
     out <- addNA(out)
     levels(out)[is.na(levels(out))] <- "Missing"
     out[is.na(out)] <- "Missing"
