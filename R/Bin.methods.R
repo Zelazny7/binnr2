@@ -30,17 +30,18 @@ setMethod("Bin", signature = c(x="factor", y="numeric", w="numeric"),
            mono=0, exceptions=numeric(0), ...) {
     ## create a mapping of raw values to collapsed values, store in "map"
     ## check for factor levels that create issues
-    if (any(levels(x) == "", na.rm=TRUE)) {
-      levels(x)[which(levels(x) == "")] <- "Missing"
-      warning(
-        sprintf("Factor levels \"\" replaced with \"Missing\" for %s", name),
-        call.=F)
-    }
+#     if (any(levels(x) == "", na.rm=TRUE)) {
+#       levels(x)[which(levels(x) == "")] <- "Missing"
+#       warning(
+#         sprintf("Factor levels \"\" replaced with \"Missing\" for %s", name),
+#         call.=F)
+#     }
 
     mono <- 0 # monotonic factors doesn't make sense
 
     ## sort the factor levels by bad rate and bin as if numeric
-    x <- factor(x, levels(x)[order(-tapply(y, x, mean))], exclude=NULL)
+    x <- droplevels(x) # Strip NAs as a level
+    x <- factor(x, levels(x)[order(-tapply(y, x, mean))])
 
     b <- Bin(as.numeric(x), y, w, name=name, min.iv=min.iv, min.cnt=min.cnt,
              min.res=min.res, max.bin=max.bin, mono=mono, exceptions=exceptions, ...)
