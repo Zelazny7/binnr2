@@ -7,8 +7,7 @@ setMethod("as.data.frame", signature = c("Bin", "missing", "missing"),
     f <- !is.na(x@x)
 
     ## get the bivariate matrix
-    # out <- tapply(x@y, binned, .bv, Y=x@y, f=f, simplify = TRUE)
-    out <- mapply(.bv2, split(x@y, binned), split(x@w, binned),
+    out <- mapply(.bv, split(x@y, binned), split(x@w, binned),
                   MoreArgs = list(Y=x@y, W=x@w, f=f), SIMPLIFY = FALSE)
 
     out[sapply(out, is.null)] <- 0
@@ -42,11 +41,14 @@ setMethod("as.data.frame", signature = c("Scorecard", "missing", "missing"),
     data.frame(
       row.names=names(x@coef[-1]),
       Contribution=x@contribution,
-      Coefficients=x@coef[-1])
+      Coefficients=x@coef[-1],
+      check.names = FALSE)
   })
+
 
 setMethod("collapse", signature = c("Bin", "missing"),
   function(object, x, ...) callGeneric(object, object@x))
+
 
 setMethod("collapse", signature = c("continuous", "numeric"),
   function(object, x, ...) {
@@ -59,7 +61,7 @@ setMethod("collapse", signature = c("continuous", "numeric"),
     out
   })
 
-#TODO: Add checks that levels are the same as when developed!!
+
 setMethod("collapse", signature = c("Discrete", "factor"),
   function(object, x, ...) {
     levels(x)[levels(x) == ""] <- "Missing"
@@ -70,6 +72,7 @@ setMethod("collapse", signature = c("Discrete", "factor"),
     out[is.na(out)] <- "Missing"
     out
   })
+
 
 ## set the pred slot in Bin using the WoE if values aren't passed
 setMethod("Update", signature = c("Bin", "missing"),
@@ -83,6 +86,7 @@ setMethod("Update", signature = c("Bin", "missing"),
     pred["Missing"] <- 0
     initialize(object, pred=pred)
   })
+
 
 #' extract parts of a Classing
 #'
@@ -102,12 +106,14 @@ setMethod("[", c(x = "Scorecard", i = "ANY", j = "missing", drop = "ANY"),
     x@classing[i]
   })
 
+
 #' @export
 setMethod("[<-", signature = c(x="Scorecard", i="ANY", j="missing", value="Classing"),
   function(x, i, j, ..., value) {
     x@classing[i] <- value
     x
   })
+
 
 #' @export
 setMethod("[<-", signature = c(x="Classing", i="ANY", j="missing", value="Classing"),
@@ -117,6 +123,7 @@ setMethod("[<-", signature = c(x="Classing", i="ANY", j="missing", value="Classi
     names(x@classing[i]) <- names(value@classing)
     x
   })
+
 
 #' extract element of a Classing
 #'
@@ -129,6 +136,7 @@ setMethod("[[", signature = c(x="Classing", i="ANY", j="missing"),
   function(x, i, j, ...) {
     x@classing[[i]]
   })
+
 
 #' @export
 setMethod("[[<-", signature = c(x="Classing", i="ANY", j="missing", value="Bin"),
@@ -156,6 +164,7 @@ setMethod("c", signature = c("Combinable"),
 
     new("Classing", classing = unlist(items))
   })
+
 
 #' @export
 setMethod("length", "Classing", function(x) length(x@classing))

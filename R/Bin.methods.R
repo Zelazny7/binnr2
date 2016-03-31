@@ -1,17 +1,22 @@
 #' @include allGenerics.R
 
-setMethod("Bin", signature = c(x="ValidBinType", y="numeric", w="missing"),
+setMethod("Bin", signature = c(x="ValidBinType", y="numeric"),
   function(x, y, w, name, min.iv=0.01, min.cnt=10, min.res=0, max.bin=10, mono=0,
             exceptions=numeric(0), ...) {
-      w <- rep(1, length(x))
-      callGeneric(x=x, y=y, w=w, name=name, min.iv=min.iv, min.cnt=min.cnt,
-                  min.res=min.res, max.bin=max.bin, mono=mono, exceptions=exceptions, ...)
+
+    # set weights to 1 if not provided
+    if (missing(w)) w <- rep(1, length(x))
+
+    callGeneric(x=x, y=y, w=w, name=name, min.iv=min.iv, min.cnt=min.cnt,
+                min.res=min.res, max.bin=max.bin, mono=mono, exceptions=exceptions, ...)
   })
 
 setMethod("Bin", signature = c(x="numeric", y="numeric", w="numeric"),
   function(x, y, w, name, min.iv=0.01, min.cnt=10, min.res=0, max.bin=10, mono=0,
             exceptions=numeric(0), ...) {
     ## discretize numeric vars and return the cut points
+    if (all(is.na(x))) return(NULL)
+
     f <- !is.na(x)
     cuts <- .Call('bin', as.double(x[f]), as.double(y[f]), as.double(w[f]),
                   as.double(min.iv), as.integer(min.cnt),
@@ -28,23 +33,18 @@ setMethod("Bin", signature = c(x="numeric", y="numeric", w="numeric"),
 setMethod("Bin", signature = c(x="factor", y="numeric", w="numeric"),
   function(x, y, w, name = "NONE", min.iv=0.01, min.cnt=10, min.res=0, max.bin=10,
            mono=0, exceptions=numeric(0), ...) {
-    ## create a mapping of raw values to collapsed values, store in "map"
-    ## check for factor levels that create issues
-#     if (any(levels(x) == "", na.rm=TRUE)) {
-#       levels(x)[which(levels(x) == "")] <- "Missing"
-#       warning(
-#         sprintf("Factor levels \"\" replaced with \"Missing\" for %s", name),
-#         call.=F)
-#     }
 
-    mono <- 0 # monotonic factors doesn't make sense
+    ## create a mapping of raw values to collapsed values, store in "map"
+
 
     ## sort the factor levels by bad rate and bin as if numeric
     x <- droplevels(x) # Strip NAs as a level
+    if (all(is.na(x))) return(NULL)
+
     x <- factor(x, levels(x)[order(-tapply(y, x, mean))])
 
     b <- Bin(as.numeric(x), y, w, name=name, min.iv=min.iv, min.cnt=min.cnt,
-             min.res=min.res, max.bin=max.bin, mono=mono, exceptions=exceptions, ...)
+             min.res=min.res, max.bin=max.bin, mono=0, exceptions=exceptions, ...)
 
     grps <- split(levels(x), cut(seq_along(levels(x)), b@cuts))
 
@@ -88,7 +88,7 @@ setMethod("Bin", signature = c(x="data.frame", y="numeric", seg="missing"),
     cols <- colnames(x)
     classing <- list()
     for (i in seq_along(cols)) {
-      .progress(i, ncol(x), "Binning   ")
+      .progress(i, ncol(x), "Binning   ", cols[i])
       classing[[cols[i]]] <- callGeneric(
         x[,cols[i]], y=y, w=w, min.iv=min.iv, min.cnt=min.cnt, min.res=min.res,
         max.bin=max.bin, mono=mono, exceptions=exceptions, name=cols[i])

@@ -44,7 +44,7 @@ setMethod("fit", signature = c(object="Classing", x="data.frame", y="numeric"),
 
     coefs <- coef(fit, s="lambda.min")[,1]
     coefs <- coefs[coefs != 0]
-    contributions <- .contributions(woe[,names(coefs)[-1]], coefs, y)
+    contributions <- .contributions(woe[,names(coefs)[-1]], coefs, y, object@w)
 
     ## flag vars as in the model
     inmodel(object) <- FALSE
@@ -55,7 +55,7 @@ setMethod("fit", signature = c(object="Classing", x="data.frame", y="numeric"),
     new(object[which(!im & inmodel(object))]) <- TRUE
 
     ## calculate performance metrics
-    ks <- .ks(woe[,names(coefs)[-1]] %*% coefs[-1] + coefs[1], y)
+    ks <- .ks(woe[,names(coefs)[-1]] %*% coefs[-1] + coefs[1], y, object@w)
 
     new("Scorecard", fit=fit, classing=object, y=y, coef=coefs,
         contribution=contributions, performance=ks)
