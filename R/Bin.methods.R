@@ -40,7 +40,7 @@ setMethod("Bin", signature = c(x="factor", y="numeric", w="numeric"),
     mono <- 0 # monotonic factors doesn't make sense
 
     ## sort the factor levels by bad rate and bin as if numeric
-    x <- factor(x, levels(x)[order(-tapply(y, x, mean))])
+    x <- factor(x, levels(x)[order(-tapply(y, x, mean))], exclude=NULL)
 
     b <- Bin(as.numeric(x), y, w, name=name, min.iv=min.iv, min.cnt=min.cnt,
              min.res=min.res, max.bin=max.bin, mono=mono, exceptions=exceptions, ...)

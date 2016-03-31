@@ -77,8 +77,7 @@ setMethod("Update", signature = c("Bin", "missing"),
     old <- object@pred
 
     pred <- head(as.data.frame(object)$WoE, -1)
-    names(pred) <- levels(collapse(object, if(is(object, "Discrete"))
-      factor() else numeric()))
+    names(pred) <- levels(collapse(object, object@x[1]))
 
     if (keep) pred[names(old)] <- old
     pred["Missing"] <- 0
