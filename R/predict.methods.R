@@ -18,18 +18,31 @@ setMethod("predict", "Predictable", function(object, ...) {
 })
 
 setMethod(".predict", signature = c("Bin", "missing"),
-  function(object, x, type, seg, ...) {
-    callGeneric(object=object, x=object@x, type, ...)
+  function(object, x, type="woe", coef=1, method="min", ...) {
+    if (missing(coef)) coef <- 1
+    if (missing(method)) method <- "min"
+    callGeneric(object=object, x=object@x, type=type, coef=coef, method=method, ...)
   })
 
+distance <- function(preds, coef, method="min") {
+  ref <- switch(method,
+                "max" = max(preds),
+                "neutral" = 0,
+                "min" = min(preds))
+  # return the distances
+  (ref - preds) * coef
+}
+
 setMethod(".predict", signature = c("Bin", "ValidBinType"),
-  function(object, x, type="woe", ...) {
+  function(object, x, type="woe", coef=1, method="min", ...) {
+    if (missing(coef)) coef <- 1
+    if (missing(method)) method <- "min"
     binned <- collapse(object, x)
     switch(type,
       "bins"  = binned,
       "woe"   = object@pred[binned],
-      "rcs"   = "Not implemented",
-      "dist"  = "Not implemented")
+      "rcs"   = object@rcs[binned],
+      "dist"  = distance(object@pred[binned], coef, method))
   })
 
 setMethod(".predict", signature = c(object="Classing", x="missing"),
@@ -56,11 +69,12 @@ setMethod(".predict", signature = c(object="Classing", x="NullOrDF"),
     }
     cat("", sep="\n")
 
-    if (type == "bins") data.frame(out) else {
-      out <- do.call(cbind, out)
-      rownames(out) <- NULL
-      out
-    }
+    data.frame(out)
+    # if (type == "bins") data.frame(out) else {
+    #   out <- do.call(cbind, out)
+    #   rownames(out) <- NULL
+    #   out
+    # }
   })
 
 setMethod(".predict", signature = c("Scorecard", "missing"),
@@ -72,8 +86,8 @@ setMethod(".predict", signature = c("Scorecard", "missing"),
 setMethod(".predict", signature = c("Scorecard", "data.frame"),
   function(object, x, type, ...) {
     if (type == "score") {
-      woe <- .predict(object@classing[names(object@coef[-1])], x=x,
-                      type="woe", ...)
+      woe <- data.matrix(.predict(object@classing[names(object@coef[-1])], x=x,
+                         type="woe", ...))
 
       score <- woe %*% object@coef[-1] + object@coef[1]
       attr(score, "dimnames")[[1]] <- NULL
@@ -84,17 +98,29 @@ setMethod(".predict", signature = c("Scorecard", "data.frame"),
 
 setMethod(".predict", signature = c("Segmented-Classing", "missing"),
   function(object, x, type, seg, ...) {
-    lapply(object@classings, predict, type=type)
+    value <- lapply(object@classings, predict, type=type)
+    # x <- value[[1L]][rep(NA, length(object@segmentor)), , drop = FALSE]
+    x <- do.call(rbind, value)
+    split(x, object@segmentor, drop = TRUE) <- value
+    rownames(x) <- NULL
+    x
   })
 
 setMethod(".predict", signature = c("Segmented-Classing", x="data.frame", seg="factor"),
   function(object, x, type, seg, ...) {
     ## check levels exist
+    # browser()
     stopifnot(all(levels(seg) %in% levels(object@segmentor)))
     lv <- levels(seg)
     xs <- split(x, seg, drop=TRUE)
-    mapply(predict, object@classings[lv], xs[lv],
-           MoreArgs = c(type=type, list(...)), SIMPLIFY = F)
+    value <- mapply(predict, object@classings[lv], xs[lv],
+                  MoreArgs = c(type=type, list(...)), SIMPLIFY = F)
+
+    # x <- value[[1L]][rep(NA, length(object@segmentor)), , drop = FALSE]
+    x <- do.call(rbind, value)
+    split(x, object@segmentor, drop = TRUE) <- value
+    rownames(x) <- NULL
+    x
   })
 
 setMethod(".predict", signature = c(object="Segmented", x="ANY", seg="ANY"),
@@ -116,7 +142,6 @@ setMethod(".predict", signature = c(object="Segmented-Scorecard", x="data.frame"
   function(object, x, type="score", seg, ...) {
     if (type == "score") {
       out <- lapply(object@scorecards, .predict, x=x, type=type, ...)
-      # if (missing(seg)) seg <- object@segmentor
 
       ## create matrix for indexing scores
       idx <- cbind(seq_along(seg), match(seg, names(out)))

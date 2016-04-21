@@ -103,6 +103,9 @@ setMethod("Bin", signature = c(x="data.frame", y="numeric", seg="factor"),
 
     if (missing(w)) w <- rep(1, nrow(x))
 
+    ## check that x, y, w, and seg are correct dimensions
+    stopifnot(all(sapply(list(y, w, seg), length) == nrow(x)))
+
     ys <- split(y, seg, drop=T)
     xs <- split(x, seg, drop=T)
     ws <- split(w, seg, drop=T)

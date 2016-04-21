@@ -33,7 +33,7 @@ setMethod("as.data.frame", signature = c("Bin", "missing", "missing"),
 setMethod("as.data.frame", signature = c("Classing", "missing", "missing"),
  function(x, row.names = NULL, optional = FALSE, ...) {
    data <- lapply(x@classing, function(bin) bin@x)
-   data.frame(data)
+   data.frame(data, check.names = FALSE)
  })
 
 setMethod("as.data.frame", signature = c("Scorecard", "missing", "missing"),
@@ -75,18 +75,13 @@ setMethod("collapse", signature = c("Discrete", "factor"),
 
 
 ## set the pred slot in Bin using the WoE if values aren't passed
-setMethod("Update", signature = c("Bin", "missing"),
-  function(object, keep = TRUE) {
-    old <- object@pred
-
+setMethod("Update", signature = c("Bin"),
+  function(object) {
     pred <- head(as.data.frame(object)$WoE, -1)
     names(pred) <- levels(collapse(object, object@x[1]))
-
-    if (keep) pred[names(old)] <- old
     pred["Missing"] <- 0
     initialize(object, pred=pred)
   })
-
 
 #' extract parts of a Classing
 #'
@@ -106,7 +101,6 @@ setMethod("[", c(x = "Scorecard", i = "ANY", j = "missing", drop = "ANY"),
     x@classing[i]
   })
 
-
 #' @export
 setMethod("[<-", signature = c(x="Scorecard", i="ANY", j="missing", value="Classing"),
   function(x, i, j, ..., value) {
@@ -123,7 +117,6 @@ setMethod("[<-", signature = c(x="Classing", i="ANY", j="missing", value="Classi
     names(x@classing[i]) <- names(value@classing)
     x
   })
-
 
 #' extract element of a Classing
 #'
@@ -162,7 +155,7 @@ setMethod("c", signature = c("Combinable"),
       }
     })
 
-    new("Classing", classing = unlist(items))
+    new("Classing", classing = unlist(items), y=x@y, w=x@w)
   })
 
 

@@ -18,15 +18,17 @@ setMethod("fit", signature = c(object="canFit", x="missing", y="missing"),
   function(object, x, y, ...) {
     classing <- classing(object)
     x <- as.data.frame(classing)
-    callGeneric(object=object, x=x, y=classing@y, ...)
+    callGeneric(object=object, x=x, y=classing@y, w=classing@w, ...)
   })
 
 #' @export
 setMethod("fit", signature = c(object="Classing", x="data.frame", y="numeric"),
-  function(object, x, y, fixed=FALSE, nfolds=3, lower.limits=0, upper.limits=3,
+  function(object, x, y, w, fixed=FALSE, nfolds=3, lower.limits=0, upper.limits=3,
            family="binomial", alpha=1, ...) {
 
     stopifnot(NROW(x) == NROW(y))
+
+    if (missing(w)) w <- rep(1, NROW(x))
 
     ## get vector of keep vars
     k <- !dropped(object)
@@ -37,14 +39,14 @@ setMethod("fit", signature = c(object="Classing", x="data.frame", y="numeric"),
     pf <- rep(1, length(object))
     if (fixed) pf[im] <- 0
 
-    fit <- glmnet::cv.glmnet(woe, y, weights=object@w, nfolds=nfolds,
+    fit <- glmnet::cv.glmnet(woe, y, weights=w, nfolds=nfolds,
                              lower.limits=lower.limits,
                              upper.limits=upper.limits, family=family,
                              alpha=alpha, penalty.factor = pf[k], ...)
 
     coefs <- coef(fit, s="lambda.min")[,1]
     coefs <- coefs[coefs != 0]
-    contributions <- .contributions(woe[,names(coefs)[-1]], coefs, y, object@w)
+    contributions <- .contributions(woe[,names(coefs)[-1]], coefs, y, w)
 
     ## flag vars as in the model
     inmodel(object) <- FALSE
@@ -55,7 +57,7 @@ setMethod("fit", signature = c(object="Classing", x="data.frame", y="numeric"),
     new(object[which(!im & inmodel(object))]) <- TRUE
 
     ## calculate performance metrics
-    ks <- .ks(woe[,names(coefs)[-1]] %*% coefs[-1] + coefs[1], y, object@w)
+    ks <- .ks(woe[,names(coefs)[-1]] %*% coefs[-1] + coefs[1], y, w)
 
     new("Scorecard", fit=fit, classing=object, y=y, coef=coefs,
         contribution=contributions, performance=ks)
@@ -81,6 +83,8 @@ setMethod("fit", signature = c("canFit", "ANY", "ANY"),
 setMethod("fit", signature = c(object="Segmented-Classing", x="data.frame", y="numeric", seg="factor"),
   function(object, x, y, w, seg, ...) {
 
+    if (missing(w)) w <- rep(1, NROW(x))
+
     ## check that classing levels are in the same order as classings
     ord <- match(levels(seg), names(object@classings))
 
@@ -89,12 +93,15 @@ setMethod("fit", signature = c(object="Segmented-Classing", x="data.frame", y="n
 
     xs <- split(x, seg)
     ys <- split(y, seg)
+    ws <- split(w, seg)
 
-    mods <- mapply(fit, object@classings[ord], xs, ys, ...)
+    mods <- mapply(fit, object@classings[ord], xs, ys, ws, ...)
 
-    score <- do.call(c, lapply(mods, predict))
-    y     <- do.call(c, lapply(mods, function(z) z@classing@y))
-    perf  <- .ks(-score, y)
+    score <- do.call(c, lapply(mods, predict, type="score"))
+    y     <- do.call(c, ys)
+    w     <- do.call(c, ws)
+
+    perf  <- .ks(-score, y, w)
 
     new("Segmented-Scorecard", scorecards=mods, segmentor=object@segmentor,
         performance=perf)
@@ -102,15 +109,17 @@ setMethod("fit", signature = c(object="Segmented-Classing", x="data.frame", y="n
   })
 
 #' @export
-setMethod("fit", signature = c(object="Segmented-Classing", x="missing",
-                               y="missing", seg="missing"),
+setMethod("fit", signature = c(object="Segmented-Classing", x="missing", y="missing", w="missing", seg="missing"),
   function(object, x, y, w, seg, ...) {
+
     mods <- lapply(object@classings, fit, ...)
 
     ## loop over all scorecards and get the prediction and response
-    score <- do.call(c, lapply(mods, predict))
+    score <- do.call(c, lapply(mods, predict, type="score"))
     y     <- do.call(c, lapply(mods, function(z) z@classing@y))
-    perf  <- .ks(-score, y)
+    w     <- do.call(c, lapply(mods, function(z) z@classing@w))
+
+    perf  <- .ks(-score, y, w)
 
     new("Segmented-Scorecard", scorecards=mods, segmentor=object@segmentor,
         performance=perf)

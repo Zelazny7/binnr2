@@ -3,13 +3,11 @@ Title: What the Package Does (one line, title case)
 Version: 0.0.0.9000
 Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
 Description: What the package does (one paragraph).
-Depends:
-    R (>= 3.0.0)
+Imports:
+    glmnet
 License: What license is it under?
 LazyData: true
 RoxygenNote: 5.0.1
-Imports:
-    glmnet
 Collate:
     'bin.class.R'
     'segmented.class.R'
@@ -25,6 +23,9 @@ Collate:
     'imports.R'
     'plot.Bin.R'
     'predict.methods.R'
+    'sas.R'
     'show.methods.R'
     'summary.methods.R'
     'util.R'
+Suggests:
+    testthat

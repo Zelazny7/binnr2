@@ -4,7 +4,10 @@
 setGeneric("collapse", function(object, x, ...) standardGeneric("collapse"))
 
 #' @export
-setGeneric("Update", function(object, keep = TRUE, ...) standardGeneric("Update"))
+setGeneric("sas", function(object, coef=1, method="min", pfx="") standardGeneric("sas"))
+
+#' @export
+setGeneric("Update", function(object, ...) standardGeneric("Update"))
 
 #' @export
 setGeneric("Bin", valueClass = c("Bin", "Classing", "Segmented", "NULL"),
@@ -30,7 +33,7 @@ setGeneric("set.meta.attr", function(x, value, .slot) standardGeneric("set.meta.
 #' @export
 setGeneric("get.meta.attr", function(x, .slot) standardGeneric("get.meta.attr"))
 
-setGeneric(".predict", function(object, x, type="woe", seg, ...) standardGeneric(".predict"))
+setGeneric(".predict", function(object, x, type="woe", seg, coef, method, ...) standardGeneric(".predict"))
 
 #' @export
 setGeneric("plot")
