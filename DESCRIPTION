@@ -24,6 +24,7 @@ Collate:
     'plot.Bin.R'
     'predict.methods.R'
     'sas.R'
+    'sensitivity.R'
     'show.methods.R'
     'summary.methods.R'
     'util.R'

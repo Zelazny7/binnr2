@@ -4,7 +4,7 @@
 setGeneric("collapse", function(object, x, ...) standardGeneric("collapse"))
 
 #' @export
-setGeneric("sas", function(object, coef=1, method="min", pfx="") standardGeneric("sas"))
+setGeneric("sas", function(object, pfx="", coef=1, method="min", ...) standardGeneric("sas"))
 
 #' @export
 setGeneric("Update", function(object, ...) standardGeneric("Update"))

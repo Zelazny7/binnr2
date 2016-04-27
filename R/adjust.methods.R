@@ -57,6 +57,7 @@ setMethod("adjust", "Classing",
           (r)eset
           (d)rop
           (a)ssign reason code
+          (c)ut points
           binnr bin operations
           != <#> : Neutralize level
           +  <#> : Expand level
@@ -80,10 +81,46 @@ setMethod("adjust", "Classing",
         #   aac <- gsub("\\s", "", inp)
         #   rcs(out[[i]]) <- aac
         # }
+      } else if (command == "c") {
+        if (!is(x[[i]], "continuous")) {
+          cat("Can only enter cut-points for continuous variables.")
+        } else {
+          cat("Enter cut-points separated by spaces:")
+          cps <- as.numeric(strsplit(readline(), "\\s+")[[1]])
+          x[[i]] <- set.cutpoints(x[[i]], cps)
+        }
       } else if (command == "g") {
-        cat("Select a variable:")
-        choice <- menu(names(x@classing), graphics=FALSE, title = "Select Variable")
-        if (choice > 0) i <- choice
+          cat("Goto variable:")
+          v <- readLines(n = 1)
+          # find the position of the variable
+          while (!(v %in% c("","Q"))) {
+            pos <- which(names(x@classing) == v)[1]
+            if (is.na(pos)) {
+              # find similar matches
+              sim <- agrep(v, names(x@classing), ignore.case = T, max.distance = 0.1)
+              if (length(sim) > 0){
+                cat(sprintf("%s not found, similar matches:", v))
+                cat(sprintf("\n %2d: %s", seq_along(sim), names(x@classing)[sim]))
+                cat("\nGoto variable:")
+                inp <- readLines(n = 1)
+                n <- suppressWarnings(as.integer(inp))
+                if (!is.na(n) & n <= length(sim)) { # check if number entered
+                  v <- names(x@classing)[sim[n]]
+                } else {
+                  v <- inp
+                }
+              } else {
+                cat("No similar variables found")
+                cat("\nHit [Enter] to continue")
+                readLines(n=1)
+                invisible()
+                break
+              }
+            } else { # found exact match
+              i <- pos
+              break
+            }
+          }
       } else if (command == "d") {
         drop(x[[i]]) <- !slot(x[[i]], "drop")
       } else if (command == "m") {

@@ -36,8 +36,9 @@ setMethod("Bin", signature = c(x="factor", y="numeric", w="numeric"),
 
     ## create a mapping of raw values to collapsed values, store in "map"
 
-
     ## sort the factor levels by bad rate and bin as if numeric
+    x <- factor(x, levels=levels(x)[!levels(x) == ""])
+
     x <- droplevels(x) # Strip NAs as a level
     if (all(is.na(x))) return(NULL)
 

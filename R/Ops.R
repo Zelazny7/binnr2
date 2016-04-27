@@ -67,10 +67,16 @@ setMethod("-", signature = c("Discrete", "numeric"),
 set.equal <- function(b, v1, v2) {
   b@history[[1]] <- b
   b@pred[v1] <- b@pred[v2]
-  Update(b)
+  b
 }
 
-
-
+## manually set cut points for bin
+#' @export
+set.cutpoints <- function(b, cps) {
+  b@history[[1]] <- b
+  cps <- sort(unique(c(-Inf, cps, Inf)))
+  b@cuts <- cps
+  Update(b)
+}
 
 
