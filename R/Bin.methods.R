@@ -33,15 +33,15 @@ setMethod("Bin", signature = c(x="numeric", y="numeric", w="numeric"),
 setMethod("Bin", signature = c(x="factor", y="numeric", w="numeric"),
   function(x, y, w, name = "NONE", min.iv=0.01, min.cnt=10, min.res=0, max.bin=10,
            mono=0, exceptions=numeric(0), ...) {
-
     ## create a mapping of raw values to collapsed values, store in "map"
 
-    ## sort the factor levels by bad rate and bin as if numeric
-    x <- factor(x, levels=levels(x)[!levels(x) == ""])
 
+    ## Remove "" and unused levels
+    x <- factor(x, levels=levels(x)[!levels(x) == ""])
     x <- droplevels(x) # Strip NAs as a level
     if (all(is.na(x))) return(NULL)
 
+    ## sort the factor levels by bad rate and bin as if numeric
     x <- factor(x, levels(x)[order(-tapply(y, x, mean))])
 
     b <- Bin(as.numeric(x), y, w, name=name, min.iv=min.iv, min.cnt=min.cnt,
@@ -77,8 +77,6 @@ setMethod("Bin", signature = "character",
 setMethod("Bin", signature = c(x="Bin", y="missing"),
   function(x, y, w, ...) do.call(Bin, modifyList(slots.to.list(x), list(...))))
 
-# setMethod("Bin", signature = c(x="Discrete", y="missing"),
-#   function(x, y, w, ...) {browser(); Bin(x@x, x@y, name=x@name)})
 
 setMethod("Bin", signature = c(x="data.frame", y="numeric", seg="missing"),
   function(x, y, w, seg, min.iv=0.01, min.cnt=10, min.res=0, max.bin=10, mono=0,

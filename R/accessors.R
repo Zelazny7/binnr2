@@ -4,7 +4,9 @@
 setAs("Classing", "list", def = function(from) from@classing)
 
 #' @export
-`drop<-` <- function(x, value) set.meta.attr(x, value, "drop")
+`dropped<-` <- function(x, value) {
+  set.meta.attr(x, value, "drop")
+}
 
 #' @export
 dropped <- function(x) get.meta.attr(x, "drop")
@@ -16,10 +18,15 @@ dropped <- function(x) get.meta.attr(x, "drop")
 inmodel <- function(x) get.meta.attr(x, "inmodel")
 
 #' @export
-`new<-` <- function(x, value) set.meta.attr(x, value, "new")
+`new.vars<-` <- function(x, value) set.meta.attr(x, value, "new")
 
 #' @export
-.new <- function(x) get.meta.attr(x, "new")
+new.vars <- function(x) get.meta.attr(x, "new")
+
+#' @export
+setMethod("names", "Classing", function(x) {
+  sapply(as(x, "list"), slot, "name")
+})
 
 setMethod("set.meta.attr", "Bin",
   function(x, value, .slot) {
@@ -29,7 +36,7 @@ setMethod("set.meta.attr", "Bin",
 
 setMethod("set.meta.attr", "Classing",
   function(x, value, .slot) {
-    for (i in seq_along(x)) x[[i]] <- callGeneric(x[[i]], value, .slot)
+    for (i in seq_along(x)) x[[i]] <- callGeneric(x[[i]], value[i], .slot)
     initialize(x)
   })
 
@@ -38,12 +45,40 @@ setMethod("set.meta.attr", "Scorecard",
     initialize(x, classing=callGeneric(x@classing, value=value, .slot=.slot))
   })
 
+## segmented methods
+# setMethod("set.meta.attr", "Segmented-Classing",
+#  function(x, value, .slot) {
+#    browser()
+#    classings <- lapply(x@classings, set.meta.attr, value, .slot)
+#    initialize(x, classings=classings)
+#  })
+
+# setMethod("set.meta.attr", "Segmented-Scorecard",
+#   function(x, value, .slot) {
+#     scorecards <- lapply(x@scorecards, set.meta.attr, value, .slot)
+#     initialize(x, scorecards=scorecards)
+#   })
+
 setMethod("get.meta.attr", "Bin", function(x, .slot) slot(x, .slot))
 
 setMethod("get.meta.attr", "Classing", function(x, .slot) {
-  sapply(as(x, "list"), slot, .slot)
+  n <- names(x)
+  out <- sapply(as(x, "list"), slot, .slot, USE.NAMES = FALSE)
+  names(out) <- n
+  out
 })
 
+
 setMethod("get.meta.attr", "Scorecard", function(x, .slot) {
-  sapply(as(x@classing, "list"), slot, .slot)
+  callGeneric(x@classing, .slot=.slot)
+})
+
+
+setMethod("get.meta.attr", "Segmented-Classing", function(x, .slot) {
+  lapply(x@classings, get.meta.attr, .slot)
+})
+
+
+setMethod("get.meta.attr", "Segmented-Scorecard", function(x, .slot) {
+  lapply(x@scorecards, get.meta.attr, .slot)
 })

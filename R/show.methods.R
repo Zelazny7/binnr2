@@ -49,7 +49,7 @@ setMethod("show", signature = "Scorecard",
     out[,3] <- format(sapply(cnt, function(i) paste(rep("*", i), collapse="")),
                       justify = "left")
 
-    out <- cbind(New=ifelse(.new(object@classing[v]), "N", ""), out)
+    out <- cbind(New=ifelse(new.vars(object@classing[v]), "N", ""), out)
 
     out <- out[order(-out[,3]),]
 

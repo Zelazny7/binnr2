@@ -9,7 +9,7 @@ setMethod("as.data.frame", signature = c("Bin", "missing", "missing"),
     ## get the bivariate matrix
     out <- mapply(.bv, split(x@y, binned), split(x@w, binned),
                   MoreArgs = list(Y=x@y, W=x@w, f=f), SIMPLIFY = FALSE)
-
+?
     out[sapply(out, is.null)] <- 0
 
     out <- do.call(rbind, out)
@@ -64,7 +64,7 @@ setMethod("collapse", signature = c("continuous", "numeric"),
 
 setMethod("collapse", signature = c("Discrete", "factor"),
   function(object, x, ...) {
-    levels(x)[levels(x) == ""] <- "Missing"
+    # levels(x)[levels(x) == ""] <- "Missing"
     out <- x
     levels(out) <- unlist(object@map)[levels(out)]
     out <- addNA(out)
@@ -108,7 +108,6 @@ setMethod("[<-", signature = c(x="Scorecard", i="ANY", j="missing", value="Class
     x
   })
 
-
 #' @export
 setMethod("[<-", signature = c(x="Classing", i="ANY", j="missing", value="Classing"),
   function(x, i, j, ..., value) {
@@ -130,11 +129,44 @@ setMethod("[[", signature = c(x="Classing", i="ANY", j="missing"),
     x@classing[[i]]
   })
 
+#' @export
+setMethod("[[", signature = c(x="Segmented-Classing", i="ANY", j="missing"),
+  function(x, i, j, ...) {
+    x@classings[[i]]
+  })
+
+#' @export
+setMethod("[", signature = c(x="Segmented-Classing", i="ANY", j="missing"),
+  function(x, i, j, ...) {
+    seg <- factor(x@segmentor[x@segmentor %in% levels(x@segmentor)[i]])
+    initialize(x, classings=x@classings[i], segmentor=seg)
+  })
+
+#' @export
+setMethod("[[", signature = c(x="Segmented-Scorecard", i="ANY", j="missing"),
+  function(x, i, j, ...) {
+    x@scorecards[[i]]
+  })
+
+#' @export
+setMethod("[", signature = c(x="Segmented-Scorecard", i="ANY", j="missing"),
+  function(x, i, j, ...) {
+    seg <- factor(x@segmentor[x@segmentor %in% levels(x@segmentor)[i]])
+    initialize(x, scorecards=x@scorecards[i], segmentor=seg)
+  })
 
 #' @export
 setMethod("[[<-", signature = c(x="Classing", i="ANY", j="missing", value="Bin"),
   function(x, i, j, ..., value) {
     x@classing[[i]] <- value
+    x
+  })
+
+## TODO: START HERE TOMORROW
+#' @export
+setMethod("[[<-", signature = c(x="Segmented-Classing", i="ANY", j="missing", value="Classing"),
+  function(x, i, j, ..., value) {
+    x@classings[[i]] <- value
     x
   })
 

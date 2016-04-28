@@ -49,12 +49,12 @@ setMethod("fit", signature = c(object="Classing", x="data.frame", y="numeric"),
     contributions <- .contributions(woe[,names(coefs)[-1]], coefs, y, w)
 
     ## flag vars as in the model
-    inmodel(object) <- FALSE
-    inmodel(object[names(coefs)[-1]]) <- TRUE
+    inmodel(object)[] <- FALSE
+    inmodel(object)[names(coefs)[-1]] <- TRUE
 
     ## flag the new vars
-    new(object) <- FALSE
-    new(object[which(!im & inmodel(object))]) <- TRUE
+    new.vars(object)[] <- FALSE
+    new.vars(object)[which(!im & inmodel(object))] <- TRUE
 
     ## calculate performance metrics
     ks <- .ks(woe[,names(coefs)[-1]] %*% coefs[-1] + coefs[1], y, w)

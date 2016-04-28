@@ -10,7 +10,7 @@ setMethod("!=", signature = c("Bin", "numeric"),
     e1@history[[1]] <- e1
     e2 <- pmax(pmin(e2, length(e1@pred)), 1)
     e1@pred[e2] <- 0
-    Update(e1)
+    e1
   })
 
 setMethod("-", signature = c("continuous", "numeric"),
@@ -41,7 +41,6 @@ setMethod("+", signature = c("continuous", "numeric"),
 
 setMethod("+", signature = c("Discrete", "numeric"),
   function(e1, e2) {
-    # browser()
     e1@history[[1]] <- e1
     f <- e1@map %in% unique(e1@map)[e2]
     e1@map[f] <- levels(e1@x)[f]
@@ -54,7 +53,6 @@ setMethod("-", signature = c("Discrete", "numeric"),
 
     ## which values were selected for collapse?
     f <- which(e1@map %in% unique(e1@map)[e2])
-    #f <- e1@map %in% names(e1@map)[e2]
 
     # collapse them with commas
     e1@map[f] <- paste(names(e1@map)[f], collapse=',')

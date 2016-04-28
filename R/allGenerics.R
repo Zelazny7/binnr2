@@ -25,7 +25,7 @@ setGeneric("fit", function(object, x, y, w, seg, ...) standardGeneric("fit"))
 setGeneric("classing", function(object) standardGeneric("classing"))
 
 #' @export
-setGeneric("adjust", function(x) standardGeneric("adjust"))
+setGeneric("adjust", function(x, header=NULL) standardGeneric("adjust"))
 
 #' @export
 setGeneric("set.meta.attr", function(x, value, .slot) standardGeneric("set.meta.attr"))

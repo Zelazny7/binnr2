@@ -6,7 +6,7 @@ setMethod("adjust", "Segmented-Scorecard",
     choices <- c(names(x@scorecards))
     i <- menu(choices, graphics = FALSE, title = "Select Segment")
     while(i) {
-      x@scorecards[[i]] <- adjust(x@scorecards[[i]])
+      x@scorecards[[i]] <- adjust(x@scorecards[[i]], header=names(x@scorecards[i]))
       i <- menu(choices, graphics = FALSE, title = "Select Segment")
     }
     x
@@ -18,7 +18,7 @@ setMethod("adjust", "Segmented-Classing",
     choices <- c(names(x@classings))
     i <- menu(choices, graphics = FALSE, title = "Select Segment")
     while(i) {
-      x@classings[[i]] <- adjust(x@classings[[i]])
+      x@classings[[i]] <- adjust(x@classings[[i]], header=names(x@classings[i]))
       i <- menu(choices, graphics = FALSE, title = "Select Segment")
     }
     x
@@ -26,16 +26,17 @@ setMethod("adjust", "Segmented-Classing",
 
 #' @export
 setMethod("adjust", "Scorecard",
-  function(x) {
-    initialize(x, classing=adjust(x@classing))
+  function(x, header=NULL) {
+    initialize(x, classing=adjust(x@classing), header)
 })
 
 #' @export
 setMethod("adjust", "Classing",
-  function(x) {
+  function(x, header=NULL) {
     i <- 1
     while(i <= length(x)) {
       cat("\014") # clear the console
+      if (!is.null(header)) cat(sprintf("Segment: %s", header))
       print(x[[i]])
       plot(x[[i]])
 
@@ -122,7 +123,7 @@ setMethod("adjust", "Classing",
             }
           }
       } else if (command == "d") {
-        drop(x[[i]]) <- !slot(x[[i]], "drop")
+        dropped(x[[i]]) <- !slot(x[[i]], "drop")
       } else if (command == "m") {
         cat("Enter Monotonicity:")
         v <- as.numeric(readLines(n = 1))
@@ -140,7 +141,7 @@ setMethod("adjust", "Classing",
         x[[i]] <- set.equal(x[[i]], v1, v2)
       } else if (command == "n") {
         i <- i + 1
-      } else if (command == "N") {
+      } else if (command == "nn") {
         nv <- .new(x)
         nvi <- which(nv)
         if (any(nv) & any(nvi > i)) i <- nvi[nvi > i][1]
@@ -150,7 +151,7 @@ setMethod("adjust", "Classing",
         } else {
           cat("\nAt beginning of list")
         }
-      } else if (command == "P") {
+      } else if (command == "pp") {
         nv <- .new(x)
         nvi <- rev(which(nv)) # index of the last in model
         if (any(nv) & any(nvi < i)) i <- nvi[nvi < i][1]
