@@ -9,7 +9,7 @@ setMethod("as.data.frame", signature = c("Bin", "missing", "missing"),
     ## get the bivariate matrix
     out <- mapply(.bv, split(x@y, binned), split(x@w, binned),
                   MoreArgs = list(Y=x@y, W=x@w, f=f), SIMPLIFY = FALSE)
-?
+
     out[sapply(out, is.null)] <- 0
 
     out <- do.call(rbind, out)
@@ -162,7 +162,6 @@ setMethod("[[<-", signature = c(x="Classing", i="ANY", j="missing", value="Bin")
     x
   })
 
-## TODO: START HERE TOMORROW
 #' @export
 setMethod("[[<-", signature = c(x="Segmented-Classing", i="ANY", j="missing", value="Classing"),
   function(x, i, j, ..., value) {
@@ -170,6 +169,12 @@ setMethod("[[<-", signature = c(x="Segmented-Classing", i="ANY", j="missing", va
     x
   })
 
+#' @export
+setMethod("[[<-", signature = c(x="Segmented-Scorecard", i="ANY", j="missing", value="Scorecard"),
+  function(x, i, j, ..., value) {
+    x@scorecards[[i]] <- value
+    x
+  })
 
 setClassUnion("Combinable", c("Bin", "Classing"))
 

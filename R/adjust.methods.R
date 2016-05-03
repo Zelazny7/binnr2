@@ -27,7 +27,7 @@ setMethod("adjust", "Segmented-Classing",
 #' @export
 setMethod("adjust", "Scorecard",
   function(x, header=NULL) {
-    initialize(x, classing=adjust(x@classing), header)
+    initialize(x, classing=adjust(x@classing, header))
 })
 
 #' @export
@@ -48,8 +48,8 @@ setMethod("adjust", "Classing",
         cat(
           "binnr interactive commands:
           (Q)uit
-          (n)ext, (N)ext new var
-          (p)revious, (P)revious new var
+          (n)ext, (nn)ext new var
+          (p)revious, (pp)revious new var
           (g)oto
           (m)ono
           (e)xceptions
@@ -142,7 +142,7 @@ setMethod("adjust", "Classing",
       } else if (command == "n") {
         i <- i + 1
       } else if (command == "nn") {
-        nv <- .new(x)
+        nv <- new.vars(x)
         nvi <- which(nv)
         if (any(nv) & any(nvi > i)) i <- nvi[nvi > i][1]
       } else if (command == "p") {
@@ -152,7 +152,7 @@ setMethod("adjust", "Classing",
           cat("\nAt beginning of list")
         }
       } else if (command == "pp") {
-        nv <- .new(x)
+        nv <- new.vars(x)
         nvi <- rev(which(nv)) # index of the last in model
         if (any(nv) & any(nvi < i)) i <- nvi[nvi < i][1]
       } else if (command == "u") {

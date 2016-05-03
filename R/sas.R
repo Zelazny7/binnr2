@@ -27,6 +27,7 @@ setMethod("sas", signature = "continuous",
     ## Adverse Action Codes
 })
 
+
 setMethod("sas", signature = "Discrete",
   function(object, pfx='', coef=1, method, i) {
 
@@ -34,16 +35,15 @@ setMethod("sas", signature = "Discrete",
                      paste, collapse="','")
 
     v <- object@name
-    p <- object@pred * coef
+    p <- object@pred[c("Missing", names(val))] * coef
 
     ref <- switch(method,"min"=min(p),"max"=max(p),"neutral"=0)
 
-    m <- which(names(p) == "Missing")
-    o <- seq_along(p)[-m]
+    o <- seq_along(p)[-1]
 
     ## WoE Substitution
     c(sprintf("\n/*** %s ***/", v),
-      sprintf("if missing(%s)\n  then %s_V%02d_w = %s;", v, pfx, i, p[m]),
+      sprintf("if missing(%s)\n  then %s_V%02d_w = %s;", v, pfx, i, p[1]),
       sprintf("else if %s in ('%s')\n  then %s_V%02d_w = %s;", v, val, pfx, i, p[o]),
       sprintf("else %s_V%02d_w = 0;" , pfx, i),
       sprintf("%s_AA_dist_%02d = %s - %s_V%02d_w;", pfx, i, ref, pfx, i))

@@ -45,6 +45,13 @@ setMethod("set.meta.attr", "Scorecard",
     initialize(x, classing=callGeneric(x@classing, value=value, .slot=.slot))
   })
 
+setMethod("set.meta.attr", "ANY",
+function(x, value, .slot) {
+  cat(sprintf("Method not implemented for class: %s", class(x)))
+})
+
+## TODO: Implement some day...
+
 ## segmented methods
 # setMethod("set.meta.attr", "Segmented-Classing",
 #  function(x, value, .slot) {

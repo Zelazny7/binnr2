@@ -33,16 +33,13 @@ setGeneric("set.meta.attr", function(x, value, .slot) standardGeneric("set.meta.
 #' @export
 setGeneric("get.meta.attr", function(x, .slot) standardGeneric("get.meta.attr"))
 
-setGeneric(".predict", function(object, x, type="woe", seg, coef, method, ...) standardGeneric(".predict"))
+setGeneric(".predict", function(object, x, type="woe", seg, coef, drop=FALSE, method="min", ...) standardGeneric(".predict"))
 
 #' @export
 setGeneric("plot")
 
 #' @export
 setGeneric("as.data.frame")
-
-#' @export
-setGeneric("c")
 
 #' @export
 setGeneric("summary")
