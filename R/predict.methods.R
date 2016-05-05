@@ -71,7 +71,7 @@ setMethod(".predict", signature = c(object="Classing", x="NullOrDF"),
     }
     cat("", sep="\n")
 
-    data.frame(out)
+    data.frame(out, row.names=NULL)
   })
 
 setMethod(".predict", signature = c("Scorecard", "missing"),
@@ -158,7 +158,12 @@ setMethod(".predict", signature = c(object="Segmented-Scorecard", x="data.frame"
   function(object, x, type="score", seg, drop=FALSE, method="min", simplify=TRUE, ...) {
     if (type == "score") {
 
-      stopifnot(all(levels(seg) %in% levels(object@segmentor)))
+      ## blank out the levels of the factor that aren't in the segmentor
+      lvls <- levels(seg)
+      levels(seg)[!lvls %in% levels(object@segmentor)] <- NA
+
+      # stopifnot(all(levels(seg) %in% levels(object@segmentor)))
+
       lv <- levels(seg)
       xs <- split(x, seg, drop=TRUE)
 

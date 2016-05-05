@@ -24,6 +24,19 @@ inmodel <- function(x) get.meta.attr(x, "inmodel")
 new.vars <- function(x) get.meta.attr(x, "new")
 
 #' @export
+`steptwo<-` <- function(x, value) set.meta.attr(x, value, "steptwo")
+
+#' @export
+steptwo <- function(x) get.meta.attr(x, "steptwo")
+
+#' @export
+`approved<-` <- function(x, value) set.meta.attr(x, value, "approved")
+
+#' @export
+approved <- function(x) get.meta.attr(x, "approved")
+
+
+#' @export
 setMethod("names", "Classing", function(x) {
   sapply(as(x, "list"), slot, "name")
 })
@@ -75,16 +88,13 @@ setMethod("get.meta.attr", "Classing", function(x, .slot) {
   out
 })
 
-
 setMethod("get.meta.attr", "Scorecard", function(x, .slot) {
   callGeneric(x@classing, .slot=.slot)
 })
 
-
 setMethod("get.meta.attr", "Segmented-Classing", function(x, .slot) {
   lapply(x@classings, get.meta.attr, .slot)
 })
-
 
 setMethod("get.meta.attr", "Segmented-Scorecard", function(x, .slot) {
   lapply(x@scorecards, get.meta.attr, .slot)

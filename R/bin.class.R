@@ -5,8 +5,11 @@ setClass("Meta", slots = list(
   drop    = "logical",
   inmodel = "logical",
   new     = "logical",
+  steptwo = "logical",
+  approved= "logical",
   history = "list"),
-  prototype = prototype(drop=FALSE, inmodel=FALSE, new=FALSE),
+  prototype = prototype(drop=FALSE, inmodel=FALSE, new=FALSE, steptwo=FALSE,
+                        approved=FALSE),
   contains = "VIRTUAL")
 
 ## virtual class contained by all bins

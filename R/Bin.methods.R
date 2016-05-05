@@ -25,7 +25,8 @@ setMethod("Bin", signature = c(x="numeric", y="numeric", w="numeric"),
 
     out <- new("continuous", x=x, y=y, w=w, cuts=cuts, min.iv=min.iv,
                min.cnt=min.cnt, min.res=min.res, max.bin=max.bin, mono=mono,
-               exceptions=exceptions, name = name)
+               exceptions=exceptions, name = name,
+               drop = all(is.infinite(cuts)))
     # get the binned levels and map to woe predictions
     Update(out)
   })
@@ -54,7 +55,7 @@ setMethod("Bin", signature = c(x="factor", y="numeric", w="numeric"),
     map <- lapply(map, paste, collapse=",")
     names(map) <- levels(x)
 
-    out <- new("Discrete", x=x, y=y, w=w, map=map, name=name)
+    out <- new("Discrete", x=x, y=y, w=w, map=map, name=name, drop=dropped(b))
     ## get the binned levels and map to woe predictions
     Update(out)
   })
@@ -77,6 +78,11 @@ setMethod("Bin", signature = "character",
 setMethod("Bin", signature = c(x="Bin", y="missing"),
   function(x, y, w, ...) do.call(Bin, modifyList(slots.to.list(x), list(...))))
 
+setMethod("Bin", signature = c(x="ANY"),
+  function(x, y, w, ...) {
+    warning("Invalid object passed to Bin", call.=F)
+    NULL
+  })
 
 setMethod("Bin", signature = c(x="data.frame", y="numeric", seg="missing"),
   function(x, y, w, seg, min.iv=0.01, min.cnt=10, min.res=0, max.bin=10, mono=0,

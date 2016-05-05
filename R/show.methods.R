@@ -5,11 +5,13 @@ setMethod("show", signature = "Bin",
     df <- as.data.frame(object)
 
     # iv <- df['Total', "IV"]
-    cat(sprintf("\n%-32s\nDropped [%1s] | In Model [%1s] | New [%1s]\n",
+    cat(sprintf("\n%-32s\nDropped [%1s] | In Model [%1s] | New [%1s] | Step 2 [%1s] | Approved [%1s] \n",
                 object@name,
                 ifelse(object@drop, "y", "n"),
                 ifelse(object@inmodel, "y", "n"),
-                ifelse(object@new, "y", "n")), sep = '\n')
+                ifelse(object@new, "y", "n"),
+                ifelse(object@steptwo, "y", "n"),
+                ifelse(object@approved, "y", "n")), sep = '\n')
 
     # make the bin look pretty
     df <- cbind(

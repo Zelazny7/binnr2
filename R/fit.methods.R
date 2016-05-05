@@ -56,10 +56,32 @@ setMethod("fit", signature = c(object="Classing", x="data.frame", y="numeric"),
     new.vars(object)[] <- FALSE
     new.vars(object)[which(!im & inmodel(object))] <- TRUE
 
+    # browser()
+    ## step two predictors
+    ## Find at least the next 10 variables that would have come in
+    steptwo(object)[] <- FALSE
+    d <- fit$glmnet.fit$df
+    idx <- which(d[which.min(fit$cvm)] + 10 < d)[1]
+    if (is.na(idx)) idx <- length(d)
+    lambda <- fit$lambda[min(idx, length(fit$lambda))]
+    step2 <- coef(fit, s=lambda)[,1]
+    step2 <- names(step2[step2 != 0])[-1]
+    steptwo(object)[setdiff(step2, names(coefs)[-1])] <- TRUE
+
+    ## Reorder the bins ##
+    vbest  <- names(sort(contributions, decreasing = T))
+    vstep2 <- setdiff(step2, names(coefs)[-1])
+    vrest  <- setdiff(names(object), c(vbest, vstep2))
+
+    ## drop non step 1 and step 2
+    dropped(object)[vrest] <- TRUE
+
+    ord <- c(vbest, vstep2, vrest)
+
     ## calculate performance metrics
     ks <- .ks(woe[,names(coefs)[-1]] %*% coefs[-1] + coefs[1], y, w)
 
-    new("Scorecard", fit=fit, classing=object, y=y, coef=coefs,
+    new("Scorecard", fit=fit, classing=object[ord], y=y, coef=coefs,
         contribution=contributions, performance=ks)
   })
 

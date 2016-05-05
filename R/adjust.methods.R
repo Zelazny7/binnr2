@@ -30,17 +30,38 @@ setMethod("adjust", "Scorecard",
     initialize(x, classing=adjust(x@classing, header))
 })
 
+## function that calculates position in classing
+.update.counters <- function(x, i) {
+  ntot <- length(x)
+  .new <- which(new.vars(x))
+  .im  <- which(inmodel(x))
+  .s2  <- which(steptwo(x))
+
+  .imx <- match(i, .im,  nomatch=0)
+  .inx <- match(i, .new, nomatch=0)
+  .s2x <- match(i, .s2,  nomatch=0)
+
+  txt <- "\nTotal [%d/%d] In Model [%d/%d] New [%d/%d] Step 2 [%d/%d]"
+  sprintf(txt, i, ntot, .imx, length(.im), .inx, length(.new), .s2x, length(.s2))
+}
+
 #' @export
 setMethod("adjust", "Classing",
   function(x, header=NULL) {
+    ## counter vars
+    # browser()
+
     i <- 1
     while(i <= length(x)) {
+
+      ## Print everything ##
       cat("\014") # clear the console
       if (!is.null(header)) cat(sprintf("Segment: %s", header))
       print(x[[i]])
       plot(x[[i]])
-
+      cat(.update.counters(x, i))
       cat ("\nEnter command (Q to quit):")
+
       command <- readLines(n = 1)
       if (command == "Q") {
         break
@@ -49,7 +70,9 @@ setMethod("adjust", "Classing",
           "binnr interactive commands:
           (Q)uit
           (n)ext, (nn)ext new var
+          (ns) next step two
           (p)revious, (pp)revious new var
+          (ps) next step two
           (g)oto
           (m)ono
           (e)xceptions
@@ -68,6 +91,7 @@ setMethod("adjust", "Classing",
         readLines(n=1)
         invisible()
       } else if (command == "a") {
+        approved(x)[i] <- !approved(x)[i]
         # cat("Enter position(optional) and reason code")
         # inp <- readLines(n=1)
         # invisible()
@@ -94,32 +118,38 @@ setMethod("adjust", "Classing",
           cat("Goto variable:")
           v <- readLines(n = 1)
           # find the position of the variable
-          while (!(v %in% c("","Q"))) {
-            pos <- which(names(x@classing) == v)[1]
-            if (is.na(pos)) {
-              # find similar matches
-              sim <- agrep(v, names(x@classing), ignore.case = T, max.distance = 0.1)
-              if (length(sim) > 0){
-                cat(sprintf("%s not found, similar matches:", v))
-                cat(sprintf("\n %2d: %s", seq_along(sim), names(x@classing)[sim]))
-                cat("\nGoto variable:")
-                inp <- readLines(n = 1)
-                n <- suppressWarnings(as.integer(inp))
-                if (!is.na(n) & n <= length(sim)) { # check if number entered
-                  v <- names(x@classing)[sim[n]]
+          n <- suppressWarnings(as.numeric(v))
+          if (!is.na(n)) {
+            i <- max(1, min(n, length(x)))
+          } else {
+
+            while (!(v %in% c("","Q"))) {
+              pos <- which(names(x@classing) == v)[1]
+              if (is.na(pos)) {
+                # find similar matches
+                sim <- agrep(v, names(x@classing), ignore.case = T, max.distance = 0.1)
+                if (length(sim) > 0){
+                  cat(sprintf("%s not found, similar matches:", v))
+                  cat(sprintf("\n %2d: %s", seq_along(sim), names(x@classing)[sim]))
+                  cat("\nGoto variable:")
+                  inp <- readLines(n = 1)
+                  n <- suppressWarnings(as.integer(inp))
+                  if (!is.na(n) & n <= length(sim)) { # check if number entered
+                    v <- names(x@classing)[sim[n]]
+                  } else {
+                    v <- inp
+                  }
                 } else {
-                  v <- inp
+                  cat("No similar variables found")
+                  cat("\nHit [Enter] to continue")
+                  readLines(n=1)
+                  invisible()
+                  break
                 }
-              } else {
-                cat("No similar variables found")
-                cat("\nHit [Enter] to continue")
-                readLines(n=1)
-                invisible()
+              } else { # found exact match
+                i <- pos
                 break
               }
-            } else { # found exact match
-              i <- pos
-              break
             }
           }
       } else if (command == "d") {
@@ -155,6 +185,14 @@ setMethod("adjust", "Classing",
         nv <- new.vars(x)
         nvi <- rev(which(nv)) # index of the last in model
         if (any(nv) & any(nvi < i)) i <- nvi[nvi < i][1]
+      } else if (command == "ns") {
+        ns <- steptwo(x)
+        nsi <- which(ns)
+        if (any(ns) & any(nsi > i)) i <- nsi[nsi > i][1]
+      } else if (command == "ps") {
+        ns <- steptwo(x)
+        nsi <- rev(which(ns)) # index of the last in model
+        if (any(ns) & any(nsi < i)) i <- nsi[nsi < i][1]
       } else if (command == "u") {
         if (length(x[[i]]@history) > 0) x[[i]] <- x[[i]]@history[[1]]
       } else if (command == "r") {

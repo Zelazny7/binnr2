@@ -30,6 +30,7 @@ reset <- function(Object) {
   Bin(Object)
 }
 
+## TODO: Fix this function!
 #' @export
 exception <- function(Object, val) {
   stopifnot(is(Object, "continuous"))
