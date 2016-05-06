@@ -56,7 +56,6 @@ setMethod("fit", signature = c(object="Classing", x="data.frame", y="numeric"),
     new.vars(object)[] <- FALSE
     new.vars(object)[which(!im & inmodel(object))] <- TRUE
 
-    # browser()
     ## step two predictors
     ## Find at least the next 10 variables that would have come in
     steptwo(object)[] <- FALSE
