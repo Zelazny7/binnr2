@@ -24,7 +24,7 @@ setMethod("fit", signature = c(object="canFit", x="missing", y="missing"),
 #' @export
 setMethod("fit", signature = c(object="Classing", x="data.frame", y="numeric"),
   function(object, x, y, w, fixed=FALSE, nfolds=3, lower.limits=0, upper.limits=3,
-           family="binomial", alpha=1, ...) {
+           family="binomial", alpha=1, keep=TRUE, ...) {
 
     # browser()
     stopifnot(NROW(x) == NROW(y))
@@ -43,7 +43,7 @@ setMethod("fit", signature = c(object="Classing", x="data.frame", y="numeric"),
     fit <- glmnet::cv.glmnet(woe, y, weights=w, nfolds=nfolds,
                              lower.limits=lower.limits,
                              upper.limits=upper.limits, family=family,
-                             alpha=alpha, penalty.factor = pf[k], ...)
+                             alpha=alpha, keep = keep, penalty.factor = pf[k], ...)
 
     coefs <- coef(fit, s="lambda.min")[,1]
     coefs <- coefs[coefs != 0]
@@ -79,7 +79,11 @@ setMethod("fit", signature = c(object="Classing", x="data.frame", y="numeric"),
     ord <- c(vbest, vstep2, vrest)
 
     ## calculate performance metrics
-    ks <- .ks(woe[,names(coefs)[-1]] %*% coefs[-1] + coefs[1], y, w)
+    if (keep) {
+      ks <- .ks(fit$fit.preval[,which.min(fit$cvm)], y, w) # kfold
+    } else {
+      ks <- .ks(woe[,names(coefs)[-1]] %*% coefs[-1] + coefs[1], y, w) # dev
+    }
 
     new("Scorecard", fit=fit, classing=object[ord], y=y, coef=coefs,
         contribution=contributions, performance=ks)
@@ -105,7 +109,7 @@ setMethod("fit", signature = c("canFit", "ANY", "ANY"),
 setMethod("fit", signature = c(object="Segmented-Classing", x="data.frame", y="numeric", seg="factor"),
   function(object, x, y, w, seg, ...) {
 
-    browser()
+    # browser()
 
     if (missing(w)) w <- rep(1, NROW(x))
 
@@ -125,7 +129,8 @@ setMethod("fit", signature = c(object="Segmented-Classing", x="data.frame", y="n
     mods <- mapply(fit, object@classings[ord], xs, ys, ws, ...)
 
     ## predict the score on the new data
-    p <- do.call(c, mapply(predict, mods, xs, type="score"))
+    #p <- do.call(c, mapply(predict, mods, xs, type="score"))
+    p <- do.call(c, mapply(predict, mods, type="kfold"))
     y <- do.call(c, ys)
     w <- do.call(c, ws)
 
@@ -140,10 +145,11 @@ setMethod("fit", signature = c(object="Segmented-Classing", x="data.frame", y="n
 setMethod("fit", signature = c(object="Segmented-Classing", x="missing", y="missing", w="missing", seg="missing"),
   function(object, x, y, w, seg, ...) {
 
+    # browser()
     mods <- lapply(object@classings, fit, ...)
 
     ## loop over all scorecards and get the prediction and response
-    score <- do.call(c, lapply(mods, predict, type="score"))
+    score <- do.call(c, lapply(mods, predict, type="kfold"))
     y     <- do.call(c, lapply(mods, function(z) z@classing@y))
     w     <- do.call(c, lapply(mods, function(z) z@classing@w))
 

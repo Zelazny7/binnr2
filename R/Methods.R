@@ -17,7 +17,7 @@ setMethod("as.data.frame", signature = c("Bin", "missing", "missing"),
     out <- cbind(out, Pred=x@pred[row.names(out)])
 
     rn <- row.names(out)
-    rn <- ifelse(nchar(rn) > 20, paste0(strtrim(rn, 17), "..."), rn)
+    rn <- ifelse(nchar(rn) > 40, paste0(strtrim(rn, 37), "..."), rn)
     row.names(out) <- paste(sprintf("%02d", 1:nrow(out)), rn, sep = ". ")
 
     ## calculate totals
@@ -53,9 +53,25 @@ setMethod("collapse", signature = c("Bin", "missing"),
 setMethod("collapse", signature = c("continuous", "numeric"),
   function(object, x, ...) {
     f <- !is.na(x) & !(x %in% object@exceptions)
-    bins <- cut(x[f], object@cuts, include.lowest = T, dig.lab=3)
-    out <- factor(x, exclude=NULL,
-                  levels=c(levels(bins),object@exceptions, NA))
+
+    # options for formatting
+    if (class(x) == "integer") {
+      nsmall <- 1
+      drop0trailing <- TRUE
+    } else {
+      nsmall <- 2
+      drop0trailing <- FALSE
+    }
+
+    l <- format(object@cuts, trim=TRUE, nsmall=nsmall, digits=2, big.mark=",",
+                scientific = FALSE, drop0trailing = drop0trailing)
+
+    lbls <- sprintf("(%s-%s]", head(l,-1), tail(l, -1))
+
+    bins <- cut(x[f], object@cuts, include.lowest = T, labels = lbls)
+
+    out <- factor(x, exclude=NULL, levels=c(levels(bins),object@exceptions, NA))
+
     levels(out)[is.na(levels(out))] <- "Missing"
     out[f] <- bins
     out

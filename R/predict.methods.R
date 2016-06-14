@@ -82,7 +82,14 @@ setMethod(".predict", signature = c("Scorecard", "missing"),
 
 setMethod(".predict", signature = c("Scorecard", "data.frame"),
   function(object, x, type, method="min", ...) {
-    if (type == "score") {
+    if (type == "kfold") {
+      # browser()
+      ## get the best lambda
+      i <- which.min(object@fit$cvm)
+      p <- object@fit$fit.preval[,i]
+      return(log(p/(1 - p)))
+    }
+    else if (type == "score") {
       woe <- data.matrix(.predict(object@classing[names(object@coef[-1])], x=x,
                          type="woe", ...))
 
@@ -133,7 +140,7 @@ setMethod(".predict", signature = c(object="Segmented", x="ANY", seg="ANY"),
 
 setMethod(".predict", signature = c(object="Segmented-Scorecard", x="missing", seg="missing"),
   function(object, x, type="score", seg, drop=FALSE, method="min", simplify=TRUE, ...) {
-    if (type == "score") {
+    if (type %in% c("score", "kfold")) {
       out <- lapply(object@scorecards, .predict, type=type, ...)
       if (simplify) unsplit(out, object@segmentor) else out
     } else {
