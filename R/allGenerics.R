@@ -9,6 +9,24 @@ setGeneric("sas", function(object, pfx="", coef=1, method="min", ...) standardGe
 #' @export
 setGeneric("Update", function(object, ...) standardGeneric("Update"))
 
+#' Bin numeric & factor vectors and data.frames
+#'
+#' @name Bin
+#' @description Bin is the workhorse function of the Binnr2 package. At the
+#' heart of the function is a fast discretization algorithm written in C that
+#' optimizes information value given a set of constraints.
+#' @param x Object to be binned. See details.
+#' @param y Dependent variable used for discretization. Only binary outcomes are
+#' currently supported. The discretization algorithm maximizes information value
+#' through binary partitions.
+#' @param w An optional numeric weight variable.
+#' @param seg An optional factor to be used for creating a segmented classing
+#' object. See details.
+#' @param A character vector of length 1 used to name the Bin. This name is used
+#' to match column names when predicting on a \code{data.frame}.
+#' @param ... Optional arguments passed on to Bin.
+#' @return A single Bin objecte or a \link{\code{Classing}} object depending on
+#' the value of \code{x} that was passed in.
 #' @export
 setGeneric("Bin", valueClass = c("Bin", "Classing", "Segmented", "NULL"),
   function(x, y, w, seg, name="NONE", ...) {

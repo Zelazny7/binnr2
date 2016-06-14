@@ -26,6 +26,7 @@ setMethod("fit", signature = c(object="Classing", x="data.frame", y="numeric"),
   function(object, x, y, w, fixed=FALSE, nfolds=3, lower.limits=0, upper.limits=3,
            family="binomial", alpha=1, ...) {
 
+    # browser()
     stopifnot(NROW(x) == NROW(y))
 
     if (missing(w)) w <- rep(1, NROW(x))
@@ -104,25 +105,31 @@ setMethod("fit", signature = c("canFit", "ANY", "ANY"),
 setMethod("fit", signature = c(object="Segmented-Classing", x="data.frame", y="numeric", seg="factor"),
   function(object, x, y, w, seg, ...) {
 
+    browser()
+
     if (missing(w)) w <- rep(1, NROW(x))
 
     ## check that classing levels are in the same order as classings
     ord <- match(levels(seg), names(object@classings))
 
     # TODO: add error message here
-    stopifnot(all(!is.na(ord)))
+    if (any(is.na(ord))) {
+      stop("Segment var has levels that weren't used to create the model")
+    }
 
+    ## Split the data by the segment var ##
     xs <- split(x, seg)
     ys <- split(y, seg)
     ws <- split(w, seg)
 
     mods <- mapply(fit, object@classings[ord], xs, ys, ws, ...)
 
-    score <- do.call(c, lapply(mods, predict, type="score"))
-    y     <- do.call(c, ys)
-    w     <- do.call(c, ws)
+    ## predict the score on the new data
+    p <- do.call(c, mapply(predict, mods, xs, type="score"))
+    y <- do.call(c, ys)
+    w <- do.call(c, ws)
 
-    perf  <- .ks(-score, y, w)
+    perf  <- .ks(-p, y, w)
 
     new("Segmented-Scorecard", scorecards=mods, segmentor=object@segmentor,
         performance=perf)
@@ -150,12 +157,30 @@ setMethod("fit", signature = c(object="Segmented-Classing", x="missing", y="miss
 setMethod("fit", signature = "Segmented-Scorecard",
   function(object, x, y, seg, ...) {
 
+    #browser()
     ## create a segmented-classing
     classings <- lapply(object@scorecards, slot, "classing")
     classings <- new("Segmented-Classing", classings=classings,
                      segmentor=object@segmentor)
 
-    callGeneric(classings)
+    callGeneric(classings, ...)
+  })
+
+#' @export
+setMethod("fit", signature = c(object="Segmented-Scorecard", x="data.frame",
+                               y="numeric", w="missing", seg="factor"),
+  function(object, x, y, seg, ...) {
+
+
+
+    # browser()
+    ## create a segmented-classing then fit with new data
+
+    classings <- lapply(object@scorecards, slot, "classing")
+    classings <- new("Segmented-Classing", classings=classings,
+                     segmentor=object@segmentor)
+
+    callGeneric(classings, x=x, y=y, seg=seg, ...)
   })
 
 

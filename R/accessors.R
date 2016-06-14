@@ -4,9 +4,7 @@
 setAs("Classing", "list", def = function(from) from@classing)
 
 #' @export
-`dropped<-` <- function(x, value) {
-  set.meta.attr(x, value, "drop")
-}
+`dropped<-` <- function(x, value) set.meta.attr(x, value, "drop")
 
 #' @export
 dropped <- function(x) get.meta.attr(x, "drop")
@@ -75,7 +73,9 @@ function(x, value, .slot) {
 
 # setMethod("set.meta.attr", "Segmented-Scorecard",
 #   function(x, value, .slot) {
-#     scorecards <- lapply(x@scorecards, set.meta.attr, value, .slot)
+#     browser()
+#     #scorecards <- lapply(x@scorecards, set.meta.attr, value, .slot)
+#     scorecards <- mapply(set.meta.attr, x@scorecards, value, MoreArgs = list(.slot=.slot))
 #     initialize(x, scorecards=scorecards)
 #   })
 

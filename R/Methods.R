@@ -83,15 +83,11 @@ setMethod("Update", signature = c("Bin"),
     initialize(object, pred=pred)
   })
 
-#' extract parts of a Classing
-#'
-#' @name [
-#' @aliases [,Classing-method
-#' @docType methods
-#' @rdname extract-methods
+
 #' @export
 setMethod("[", c(x = "Classing", i = "ANY", j = "missing", drop = "ANY"),
   function(x, i, j, ..., drop = TRUE) {
+    # browser()
     initialize(x, classing=x@classing[i])
   })
 
@@ -117,12 +113,6 @@ setMethod("[<-", signature = c(x="Classing", i="ANY", j="missing", value="Classi
     x
   })
 
-#' extract element of a Classing
-#'
-#' @name [[
-#' @aliases [[,Classing-method
-#' @docType methods
-#' @rdname extract-methods
 #' @export
 setMethod("[[", signature = c(x="Classing", i="ANY", j="missing"),
   function(x, i, j, ...) {
@@ -138,8 +128,9 @@ setMethod("[[", signature = c(x="Segmented-Classing", i="ANY", j="missing"),
 #' @export
 setMethod("[", signature = c(x="Segmented-Classing", i="ANY", j="missing"),
   function(x, i, j, ...) {
-    seg <- factor(x@segmentor[x@segmentor %in% levels(x@segmentor)[i]])
-    initialize(x, classings=x@classings[i], segmentor=seg)
+    # browser()
+    #seg <- factor(x@segmentor[x@segmentor %in% levels(x@segmentor)[idx]])
+    initialize(x, classings=x@classings[i])
   })
 
 #' @export
@@ -151,8 +142,9 @@ setMethod("[[", signature = c(x="Segmented-Scorecard", i="ANY", j="missing"),
 #' @export
 setMethod("[", signature = c(x="Segmented-Scorecard", i="ANY", j="missing"),
   function(x, i, j, ...) {
-    seg <- factor(x@segmentor[x@segmentor %in% levels(x@segmentor)[i]])
-    initialize(x, scorecards=x@scorecards[i], segmentor=seg)
+    # idx <- match(names(x@scorecards)[i], levels(x@segmentor))
+    # seg <- factor(x@segmentor[x@segmentor %in% levels(x@segmentor)[idx]])
+    initialize(x, scorecards=x@scorecards[i])
   })
 
 #' @export
@@ -173,6 +165,13 @@ setMethod("[[<-", signature = c(x="Segmented-Classing", i="ANY", j="missing", va
 setMethod("[[<-", signature = c(x="Segmented-Scorecard", i="ANY", j="missing", value="Scorecard"),
   function(x, i, j, ..., value) {
     x@scorecards[[i]] <- value
+    x
+  })
+
+#' @export
+setMethod("[<-", signature = c(x="Segmented-Scorecard", i="ANY", j="missing", value="Scorecard"),
+  function(x, i, j, ..., value) {
+    x@scorecards[i] <- value
     x
   })
 

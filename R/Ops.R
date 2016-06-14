@@ -1,6 +1,5 @@
 setMethod("Ops", c("Bin", "numeric"),
   function(e1, e2) {
-    print("In here!")
     e1@history[[length(e1@history)]] <- e1
     callGeneric(e1=e1, e2=e2)
   })
