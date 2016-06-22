@@ -19,10 +19,22 @@ slots.to.list <- function(s4) {
 
 #' @export
 mono <- function(Object, val) {
-  val <- if(val %in% c(-1,0,1,2)) val else 0
-  b <- Bin(x=Object, mono=val)
-  b@history[[1]] <- Object
-  b
+  if (!is(Object, "continuous")) {
+    l <- readline("Cannot set monotonicity for discrete bins\nPress [enter] to continue")
+    return(Object)
+  } else if (!is.numeric(val)) {
+    l <- readline("Monotonicity values must be numeric\nPress [enter] to continue")
+    return(Object)
+  } else {
+    val <- if(val %in% c(-1,0,1,2)) val else 0
+
+    ## get the new cuts
+    b <- Bin(x=Object, mono=val)
+
+    Object@history[[1]] <- Object
+    Object@cuts <- b@cuts
+    Update(Object)
+  }
 }
 
 #' @export
@@ -30,12 +42,18 @@ reset <- function(Object) {
   Bin(Object)
 }
 
-## TODO: Fix this function!
 #' @export
 exception <- function(Object, val) {
-  stopifnot(is(Object, "continuous"))
-  stopifnot(is.numeric(val))
-  Bin(x=Object, exceptions=val)
+  if (!is(Object, "continuous")) {
+    l <- readline("Cannot set exception values for discrete bins\nPress [enter] to continue")
+    return(Object)
+  } else if (!is.numeric(val)) {
+    l <- readline("Exception values must be numeric\nPress [enter] to continue")
+    return(Object)
+  } else {
+    Object@exceptions <- val
+    Update(initialize(Object))
+  }
 }
 
 

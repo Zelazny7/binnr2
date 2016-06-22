@@ -48,10 +48,19 @@ setMethod("adjust", "Scorecard",
 #' @export
 setMethod("adjust", "Classing",
   function(x, header=NULL) {
-    ## counter vars
-    # browser()
 
+    ## check if first time through loop
     i <- 1
+    bm <- slot(x, "bookmark")
+    if (length(bm) > 0) {
+      l <- readline(
+        sprintf("Bookmark found. Resume at: %s? (y/n): ", bm))
+      if (l == "y") {
+        i <- if (l == "y") which(names(x@classing) == bm) else i
+        if (length(i) == 0) i <- 1
+      }
+    }
+
     while(i <= length(x)) {
 
       ## Print everything ##
@@ -69,18 +78,17 @@ setMethod("adjust", "Classing",
         cat(
           "binnr interactive commands:
           (Q)uit
-          (n)ext, (nn)ext new var
-          (ns) next step two
-          (p)revious, (pp)revious new var
-          (ps) next step two
+          (n)ext (nn) new var (ns) step two
+          (p)rev (pp) new var (ps) step two
           (g)oto
           (m)ono
           (e)xceptions
           (s)et equal
+          (b)ookmark
           (u)ndo
           (r)eset
           (d)rop
-          (a)ssign reason code
+          (a)pprove
           (c)ut points
           binnr bin operations
           != <#> : Neutralize level
@@ -106,6 +114,17 @@ setMethod("adjust", "Classing",
         #   aac <- gsub("\\s", "", inp)
         #   rcs(out[[i]]) <- aac
         # }
+      } else if (command == "b") {
+        bm <- slot(x, "bookmark")
+        if (length(bm) == 0) {
+          slot(x, "bookmark") <- names(x@classing)[i]
+        } else {
+          l <- readline(
+            sprintf("Bookmark already exists at: %s. Replace? (y/n): ", bm))
+          if (l == "y") {
+            slot(x, "bookmark") <- names(x@classing)[i]
+          }
+        }
       } else if (command == "c") {
         if (!is(x[[i]], "continuous")) {
           cat("Can only enter cut-points for continuous variables.")
@@ -117,9 +136,11 @@ setMethod("adjust", "Classing",
       } else if (command == "g") {
           cat("Goto variable:")
           v <- readLines(n = 1)
-          # find the position of the variable
           n <- suppressWarnings(as.numeric(v))
-          if (!is.na(n)) {
+
+          if (v == "b") {
+            i <- which(names(x) == slot(x, "bookmark"))
+          } else if (!is.na(n)) {
             i <- max(1, min(n, length(x)))
           } else {
 
@@ -161,8 +182,12 @@ setMethod("adjust", "Classing",
       } else if (command == "e") {
         cat("Enter Exceptions:")
         v <- readLines(n = 1)
-        e <- eval(parse(text=v))
-        if (is.numeric(e) | is.null(e)) x[[i]] <- Bin(x[[i]], exceptions=e)
+        x[[i]] <- exception(x[[i]], val = eval(parse(text=v)))
+        # v <- readLines(n = 1)
+        # e <- eval(parse(text=v))
+        # if (is.numeric(e) | is.null(e)) {
+        #
+        # }
       } else if (command == "s") {
         cat("Enter Level(s) to Change:")
         v1 <- as.integer(readLines(n = 1))

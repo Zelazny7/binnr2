@@ -49,7 +49,8 @@ setClass("Classing",
   slots = list(
     classing = "list",
     y        = "numeric",
-    w        = "numeric"),
+    w        = "numeric",
+    bookmark = "character"),
   validity = function(object) {
     if (all(sapply(object@classing, is, "Bin"))) TRUE
     else "All members of a Classing object must be Bin objects"

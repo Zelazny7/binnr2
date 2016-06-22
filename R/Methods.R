@@ -54,19 +54,15 @@ setMethod("collapse", signature = c("continuous", "numeric"),
   function(object, x, ...) {
     f <- !is.na(x) & !(x %in% object@exceptions)
 
-    # options for formatting
-    if (class(x) == "integer") {
-      nsmall <- 1
-      drop0trailing <- TRUE
-    } else {
-      nsmall <- 2
-      drop0trailing <- FALSE
-    }
+    l <- format(object@cuts, trim=TRUE, nsmall=2, digits=2, big.mark=",",
+                scientific = FALSE)
 
-    l <- format(object@cuts, trim=TRUE, nsmall=nsmall, digits=2, big.mark=",",
-                scientific = FALSE, drop0trailing = drop0trailing)
+    ## get width of largest value
+    width <- max(nchar(l))
 
-    lbls <- sprintf("(%s-%s]", head(l,-1), tail(l, -1))
+    fmt <- sprintf("(%%%1$ds - %%%1$ds]", width)
+
+    lbls <- sprintf(fmt, head(l,-1), tail(l, -1))
 
     bins <- cut(x[f], object@cuts, include.lowest = T, labels = lbls)
 

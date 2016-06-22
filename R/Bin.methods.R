@@ -75,8 +75,10 @@ setMethod("Bin", signature = "character",
     NULL
   })
 
-setMethod("Bin", signature = c(x="Bin", y="missing"),
-  function(x, y, w, ...) do.call(Bin, modifyList(slots.to.list(x), list(...))))
+setMethod("Bin", signature = c(x="Bin"),
+  function(x, y, w, ...) {
+    do.call(Bin, modifyList(slots.to.list(x), list(...)))
+})
 
 setMethod("Bin", signature = c(x="ANY"),
   function(x, y, w, ...) {

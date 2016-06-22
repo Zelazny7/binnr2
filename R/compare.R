@@ -34,22 +34,22 @@ setMethod("compare", signature=c(object="Scorecard"),
 
 
 setMethod("compare", signature=c(object="Segmented-Scorecard"),
-  function(object, ...) {
-    others <- list(...)
+          function(object, ...) {
+            others <- list(...)
 
-    stopifnot(all(sapply(others, inherits, "Segmented-Scorecard")))
+            stopifnot(all(sapply(others, inherits, "Segmented-Scorecard")))
 
-    ## make sure all models have the same segments
-    levels <- lapply(c(object, others), function(x) {
-      levels(object@segmentor)
-    })
+            ## make sure all models have the same segments
+            levels <- lapply(c(object, others), function(x) {
+              levels(object@segmentor)
+            })
 
-    if (!all(duplicated(levels)[-1L])) {
-      stop("Compared scorecards do not all have the same segment variables")
-    }
+            if (!all(duplicated(levels)[-1L])) {
+              stop("Compared scorecards do not all have the same segment variables")
+            }
 
 
 
-  })
+          })
 
 

@@ -1,5 +1,5 @@
-#' @import Matrix
-NULL
+# #' @import Matrix
+#NULL
 
 #' @useDynLib binnr2
 NULL

@@ -1,4 +1,5 @@
 ## test various ways of predicting
+library(binnr2)
 data(titanic)
 tests <- list()
 

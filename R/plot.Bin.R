@@ -27,14 +27,12 @@ setMethod("plot", signature = "Bin", definition = function(x, y, ...) {
 
   # lots of margin magic
   # http://dr-k-lo.blogspot.com/2014/03/the-simplest-way-to-plot-legend-outside.html
-  par(oma = c(2, 1, 1, 1))
-  lims <- c(min(WoE) - 0.5, max(WoE) + 0.5)
-  par(mar=c(5, maxN, 1, 1))
+  par(oma = c(2, 1, 1, 1), mar=c(5, maxN, 1, 1))
+  xlim <- c(min(WoE) - 0.5, max(WoE) + 0.5)
+    #browser()
+  bp <- barplot(rev(WoE), horiz=T, las=1, xlim = xlim, cex.names = 0.8,
+    xlab = "Weight-of-Evidence", col = colors, cex.axis = 0.8)
 
-  bp <- barplot(rev(WoE), horiz=T, las=1, xlim = lims, cex.names = 0.8,
-                xlab = "Weight-of-Evidence", col = colors, cex.axis = 0.8)
-
-  # add guide
   text(x=min(WoE), y=bp, length(WoE):1, font=2, cex=0.8, pos=2, col="#131F2C")
 
   # overlay legend across entire plot and add to bottom
