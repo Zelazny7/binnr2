@@ -20,6 +20,7 @@ Collate:
     'accessors.R'
     'adjust.methods.R'
     'compare.R'
+    'corr.prune.R'
     'fit.methods.R'
     'imports.R'
     'plot.Bin.R'
