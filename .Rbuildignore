@@ -1,4 +1,8 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^data-raw$
-\shiny
+/shiny
+\.git*
+\.DS_Store
+\.Rhistory
+\.\.Rcheck

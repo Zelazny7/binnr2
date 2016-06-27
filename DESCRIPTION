@@ -1,7 +1,8 @@
 Package: binnr2
 Title: Scorecard modeling in R
 Version: 0.3.2
-Authors@R: person("Eric", "Graves", email = "gracon5@gmail.com", role = c("aut", "cre"))
+Author: Eric Graves
+Maintainer: "Eric Graves" <gravcon5@gmail.com>
 Description: Create, manipulate, and manage binned variables for scorecard
     modeling
 Imports:

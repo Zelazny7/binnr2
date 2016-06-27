@@ -35,7 +35,7 @@ void enqueue(struct queue *q, struct work w) {
 struct work dequeue(struct queue *q) {
     struct work out = {0};
     if (q->first == NULL) {
-        printf("No items to dequeue!\n");
+        //Rprintf("No items to dequeue!\n");
     } else {
         struct node* tmp = q->first;
 

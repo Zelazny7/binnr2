@@ -6,6 +6,3 @@ NULL
 
 #' @import glmnet
 NULL
-
-#' @import methods
-NULL
