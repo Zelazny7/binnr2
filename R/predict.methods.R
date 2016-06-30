@@ -71,7 +71,7 @@ setMethod(".predict", signature = c(object="Classing", x="NullOrDF"),
     }
     cat("", sep="\n")
 
-    data.frame(out, row.names=NULL)
+    data.frame(out, row.names=NULL, check.names = FALSE)
   })
 
 setMethod(".predict", signature = c("Scorecard", "missing"),

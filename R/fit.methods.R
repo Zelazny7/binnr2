@@ -26,7 +26,7 @@ setMethod("fit", signature = c(object="Classing", x="data.frame", y="numeric"),
   function(object, x, y, w, fixed=FALSE, nfolds=3, lower.limits=0, upper.limits=3,
            family="binomial", alpha=1, keep=TRUE, ...) {
 
-    # browser()
+    #browser()
     stopifnot(NROW(x) == NROW(y))
 
     if (missing(w)) w <- rep(1, NROW(x))
@@ -84,6 +84,8 @@ setMethod("fit", signature = c(object="Classing", x="data.frame", y="numeric"),
     } else {
       ks <- .ks(woe[,names(coefs)[-1]] %*% coefs[-1] + coefs[1], y, w) # dev
     }
+
+    # browser()
 
     new("Scorecard", fit=fit, classing=object[ord], y=y, coef=coefs,
         contribution=contributions, performance=ks)

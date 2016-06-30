@@ -1,6 +1,3 @@
-# #' @import Matrix
-#NULL
-
 #' @useDynLib binnr2
 NULL
 
