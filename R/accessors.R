@@ -33,7 +33,6 @@ steptwo <- function(x) get.meta.attr(x, "steptwo")
 #' @export
 approved <- function(x) get.meta.attr(x, "approved")
 
-
 #' @export
 setMethod("names", "Classing", function(x) {
   sapply(as(x, "list"), slot, "name")
