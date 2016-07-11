@@ -24,7 +24,6 @@ fun <- function(bins) {
 
   function(input, output) {
 
-
     output$summary <- DT::renderDataTable({
       DT::datatable(
         su,
@@ -50,6 +49,10 @@ fun <- function(bins) {
       stopApp(bins)
     })
 
+    observeEvent(input$drop, {
+      i <- input$summary_row_last_clicked
+      dropped(bins[[i]]) <- !dropped(bins)
+    })
 
 
     observeEvent(input$collapse, {

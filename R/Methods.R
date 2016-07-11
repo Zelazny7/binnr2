@@ -123,6 +123,13 @@ setMethod("[<-", signature = c(x="Scorecard", i="ANY", j="missing", value="Class
   })
 
 #' @export
+setMethod("[[<-", signature = c(x="Scorecard", i="ANY", j="missing", value="Bin"),
+  function(x, i, j, ..., value) {
+    x@classing[[i]] <- value
+    x
+  })
+
+#' @export
 setMethod("[<-", signature = c(x="Classing", i="ANY", j="missing", value="Classing"),
   function(x, i, j, ..., value) {
     stopifnot(length(x@classing[i]) == length(value))

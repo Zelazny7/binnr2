@@ -14,7 +14,11 @@ setMethod("!=", signature = c("Bin", "numeric"),
 
 setMethod("-", signature = c("continuous", "numeric"),
   function(e1, e2) {
-    if (!all(diff(e2)==1)) return(e1)
+    if (length(e2) == 1) return(e1)
+
+    ## fill in gaps if first and last are selected, for example
+    e2 <- seq(min(e2), max(e2))
+
     e1@history[[1]] <- e1
     ## make sure the requested collapse levels are within the acceptable range
     e2 <- unique(pmax(pmin(tail(e2, -1), length(e1@cuts) - 1), 2))

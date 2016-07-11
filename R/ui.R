@@ -16,14 +16,14 @@ ui <- fluidPage(title = "Binnr 2.0.1",
     column(12, DT::dataTableOutput("summary"))
   ),
 
-
-
   fluidRow(
       actionButton("collapse", " - ", width = '40px'),
       actionButton("expand", " + ", width = '40px'),
       actionButton("neutral", " != ", width = '40px'),
       div(style='display:inline-block',selectInput("mono", label = "Monotonicity", choices = -1:2, multiple = FALSE,
                          selected = 0, width = '60px', selectize = FALSE)),
+
+      actionButton("drop", " Drop ", width = '40px'),
       shiny::actionButton("save", "Save"),
     column(12, DT::dataTableOutput("bivariate"))
   ),
