@@ -1,6 +1,15 @@
 \name{bin-methods}
 \alias{bin-methods}
 \alias{Bin}
+\alias{Bin,ANY,ANY,ANY,ANY-method}
+\alias{Bin,Bin,ANY,ANY,ANY-method}
+\alias{Bin,ValidBinType,numeric,ANY,ANY-method}
+\alias{Bin,character,ANY,ANY,ANY-method}
+\alias{Bin,data.frame,numeric,ANY,factor-method}
+\alias{Bin,data.frame,numeric,ANY,missing-method}
+\alias{Bin,factor,numeric,numeric,ANY-method}
+\alias{Bin,logical,ANY,ANY,ANY-method}
+\alias{Bin,numeric,numeric,numeric,ANY-method}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Bin methods for discretizing variables

@@ -110,6 +110,12 @@ setMethod("[", c(x = "Scorecard", i = "ANY", j = "missing", drop = "ANY"),
   })
 
 #' @export
+setMethod("[[", c(x = "Scorecard", i = "ANY", j = "missing"),
+  function(x, i, j, ..., drop = TRUE) {
+    x@classing[[i]]
+  })
+
+#' @export
 setMethod("[<-", signature = c(x="Scorecard", i="ANY", j="missing", value="Classing"),
   function(x, i, j, ..., value) {
     x@classing[i] <- value

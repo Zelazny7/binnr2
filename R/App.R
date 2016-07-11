@@ -1,80 +1,121 @@
 library(shiny)
+add.tags <- function(v) {
 
-styleColorBar2 <- function(data){
-  r1 = min(data)
-  r2 = max(data)
+  ## how much of the first should be blanked out
+  p1 <- ifelse(v > 0, 50, 50 - 100 * (v/min(v)/2))
+  p2 <- ifelse(v <= 0, 50 - p1, 100 * (v/max(v)/2))
+  p3 <- ifelse(v <= 0, 50, 50 - p2)
+  color <- ifelse(v > 0, 'lightcoral', 'lightblue')
 
-  ## Create three different kinds of JS depending on the value
-  JS(gsub("\\n", "", sprintf("
-       value < 0 ?
-      'linear-gradient(90deg, transparent, red ' + (50 - 100*(value/%s/2)) + '%%, transparent 50%%)'
-      :
-      'linear-gradient(90deg, transparent , blue 50%%, transparent ' + (50 + 100*(value/%s/2)) + '%%)'",
-    r1, r2)))
+  sprintf(
+    paste0(
+      "<div style='position:relative;'>",
+      "<div style='position:relative;z-index:1;'>%0.4f</div>",
+      "<div style='position:absolute;top:0;bottom:0;left:0;width:%s%%;'></div>",
+      "<div style='position:absolute;top:0;bottom:0;left:%s%%;width:%s%%;background-color:%s;'></div>",
+      "<div style='position:absolute;top:0;bottom:0;right:0;width:%s%%;'></div>",
+      "</div>"
+    ), v, p1, p1, p2, color, p3)
 }
 
 ## function that wraps the server function
 fun <- function(bins) {
   su <- summary(bins)
-  i <- 1
-
 
   function(input, output) {
 
-    output$summary <- DT::renderDataTable(
+
+    output$summary <- DT::renderDataTable({
       DT::datatable(
         su,
         style = "bootstrap",
-        selection = list(
-          mode = "single",
-          selected = 1)
+        extensions = 'KeyTable',
+        selection = list(mode="single", selected=1, target="row"),
+        options = list(
+          pageLength = 5,
+          keys = TRUE,
+          blur = TRUE)
         )
-    )
+    })
 
-    output$debug <- renderText(input$summary_row_last_clicked)
+    output$debug <- renderText({
+      #browser()
+      i <- input$summary_row_last_clicked
+      z <- input$summary_row_last_clicked_focus
+      print(i)
+      print(z)
+    })
 
-    output$Bivariate <- DT::renderDataTable({
+    observeEvent(input$save, {
+      stopApp(bins)
+    })
 
-      i <- as.integer(input$summary_row_last_clicked)
 
+
+    observeEvent(input$collapse, {
+      #browser()
+      i <- input$summary_row_last_clicked
+      v <- input$bivariate_rows_selected
+      v <- seq(min(v), max(v))
+      print(v)
+      bins[[i]] <<- bins[[i]] - v
+    })
+
+    observeEvent(input$expand, {
+      browser()
+      i <- input$summary_row_last_clicked
+      v <- input$bivariate_row_last_clicked
+      print(v)
+      bins[[i]] <<- bins[[i]] + v
+    })
+
+    observeEvent(input$mono, {
+      i <- input$summary_row_last_clicked
+      if (!is.null(i)) bins[[i]] <<- mono(bins[[i]], as.numeric(input$mono))
+    })
+
+    output$bivariate <- DT::renderDataTable({
+
+      input$collapse
+      input$expand
+      input$mono
+      i <- input$summary_row_last_clicked
+      if (is.null(i)) i <- 1
+
+      #browser()
 
       tbl <- as.data.frame(bins[[i]])
-      v <- tbl$Pred
+      tbl$WoE <- add.tags(tbl$WoE)
 
       ## create the javascript
 
-
-
-
-      DT::formatStyle(
       DT::formatRound(
       DT::formatPercentage(
         DT::datatable(
           tbl,
           style = "bootstrap",
-          selection = "none",
+          selection = "multiple",
           filter = "none",
+          escape = 8,
           options = list(
+            paging = FALSE,
+            ordering = FALSE,
+            searching = FALSE,
+            info = FALSE,
             columnDefs = list(
             list(
               targets = 10,
               visible = FALSE),
             list(
               targets=8,
+              className = 'dt-center',
               width= '200px')
             )
           )
         ),
           columns = 4:7
         ),
-          columns = 8:10, 3
-        ),
-          columns = 8,
-          valueColumns = 10,
-          background =  styleColorBar2(v),
-          backgroundSize = '98% 88%',
-          backgroundRepeat = 'no-repeat',
-          backgroundPosition = 'center'
+          columns = 9:10, 3
         )
 
     })

@@ -11,6 +11,7 @@ License: Proprietary
 LazyData: true
 RoxygenNote: 5.0.1
 Collate:
+    'App.R'
     'bin.class.R'
     'segmented.class.R'
     'allGenerics.R'
@@ -29,6 +30,7 @@ Collate:
     'sensitivity.R'
     'show.methods.R'
     'summary.methods.R'
+    'ui.R'
     'util.R'
 Suggests:
     testthat
