@@ -1,30 +1,32 @@
+get.bin.summary <- function(df, object) {
+  Nex <- if (is(object, "continuous"))
+    sum(object@x %in% object@exceptions) else 0
+  Nna <- sum(is.na(object@x))
+
+  ## summarize the meta data
+  meta <- names(getSlots("Meta"))
+  meta <- meta[!meta %in% c("history", "summary")]
+  meta <- sapply(meta, function(x) c("N" , "Y")[slot(object, x) + 1],
+    simplify = F)
+
+  ## return a data.frame of summary info
+  data.frame(
+    "Type"    = class(object),
+    "IV"      = sprintf("%1.4f", df["Total","IV"]),
+    "# Bins"  = nrow(df) - 2, # subtract missing & total rows
+    "# Uniq"  = length(unique(object@x)),
+    "Tot N"   = df["Total", "N"],
+    "# Valid" = df["Total", "N"] - Nex - Nna,
+    "# Missing" = Nna,
+    "# Exceptions" = Nex,
+    meta,
+    check.names=F, stringsAsFactors=F)
+}
+
 #' @export
 setMethod("summary", "Bin",
   function(object, ...) {
-    df <- as.data.frame(object)
-
-    Nex <- if (is(object, "continuous"))
-      sum(object@x %in% object@exceptions) else 0
-    Nna <- sum(is.na(object@x))
-
-    ## summarize the meta data
-    meta <- names(getSlots("Meta"))
-    meta <- meta[!meta == "history"]
-    meta <- sapply(meta, function(x) c("N" , "Y")[slot(object, x) + 1],
-                   simplify = F)
-
-    ## return a data.frame of summary info
-    data.frame(
-      "Type"    = class(object),
-      "IV"      = sprintf("%1.4f", df["Total","IV"]),
-      "# Bins"  = nrow(df) - 2, # subtract missing & total rows
-      "# Uniq"  = length(unique(object@x)),
-      "Tot N"   = df["Total", "N"],
-      "# Valid" = df["Total", "N"] - Nex - Nna,
-      "# Missing" = Nna,
-      "# Exceptions" = Nex,
-      meta,
-      check.names=F, stringsAsFactors=F)
+    as.data.frame(object@summary, check.names=FALSE, stringsAsFactors=FALSE)
   })
 
 #' @export

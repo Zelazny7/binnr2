@@ -7,7 +7,8 @@ setClass("Meta", slots = list(
   new     = "logical",
   steptwo = "logical",
   approved= "logical",
-  history = "list"),
+  history = "list",
+  summary = "list"),
   prototype = prototype(drop=FALSE, inmodel=FALSE, new=FALSE, steptwo=FALSE,
                         approved=FALSE),
   contains = "VIRTUAL")

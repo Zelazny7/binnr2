@@ -24,73 +24,78 @@ fun <- function(bins) {
 
   function(input, output) {
 
+    ## values that should trigger updates when changed
+    values <- reactiveValues(summary=su, i=1, bins=bins)
+
     output$summary <- DT::renderDataTable({
       DT::datatable(
-        su,
+        values$summary,
         style = "bootstrap",
-        extensions = 'KeyTable',
-        selection = list(mode="single", selected=1, target="row"),
+        selection = list(mode="single", target="row"),
         options = list(
           pageLength = 5,
-          keys = TRUE,
-          blur = TRUE)
-        )
+          displayStart = values$i - 1
+        ))
+    }, server = TRUE)
+
+    observeEvent(input$summary_row_last_clicked, {
+      values$i <- input$summary_row_last_clicked
+    })
+
+    proxy <- DT::dataTableProxy('summary')
+
+    observeEvent(input$summary_row_last_clicked, {
+      DT::selectRows(proxy, values$i)
     })
 
     output$debug <- renderText({
-      #browser()
-      i <- input$summary_row_last_clicked
       z <- input$summary_row_last_clicked_focus
-      print(i)
       print(z)
     })
 
     observeEvent(input$save, {
-      stopApp(bins)
+      stopApp(values$bins)
     })
 
+    ### DROP ###
     observeEvent(input$drop, {
-      i <- input$summary_row_last_clicked
-      dropped(bins[[i]]) <- !dropped(bins)
+      dropped(values$bins[[values$i]]) <- !dropped(values$bins[[values$i]])
+      values$summary[values$i,] <- summary(values$bins[[values$i]])
     })
 
-
+    ### COLLAPSE ###
     observeEvent(input$collapse, {
-      #browser()
-      i <- input$summary_row_last_clicked
       v <- input$bivariate_rows_selected
       v <- seq(min(v), max(v))
-      print(v)
-      bins[[i]] <<- bins[[i]] - v
+      values$bins[[values$i]] <- values$bins[[values$i]] - v
     })
 
+    ### EXPAND ###
     observeEvent(input$expand, {
-      browser()
-      i <- input$summary_row_last_clicked
       v <- input$bivariate_row_last_clicked
-      print(v)
-      bins[[i]] <<- bins[[i]] + v
+      values$bins[[values$i]] <- values$bins[[values$i]] + v
     })
 
     observeEvent(input$mono, {
-      i <- input$summary_row_last_clicked
-      if (!is.null(i)) bins[[i]] <<- mono(bins[[i]], as.numeric(input$mono))
+      if (!is.null(values$i)) {
+        values$bins[[values$i]] <- mono(values$bins[[values$i]],
+          as.numeric(input$mono))
+      }
+    })
+
+    observeEvent(input$dropped, {
+      print("holy crap that worked")
+    })
+
+    ### HEADER ###
+    output$info <- renderUI({
+      get.header(values$bins[[values$i]])
     })
 
     output$bivariate <- DT::renderDataTable({
 
-      input$collapse
-      input$expand
-      input$mono
-      i <- input$summary_row_last_clicked
-      if (is.null(i)) i <- 1
-
-      #browser()
-
-      tbl <- as.data.frame(bins[[i]])
+      tbl <- as.data.frame(values$bins[[values$i]])
       tbl$WoE <- add.tags(tbl$WoE)
-
-      ## create the javascript
 
       DT::formatRound(
       DT::formatPercentage(
@@ -120,18 +125,27 @@ fun <- function(bins) {
         ),
           columns = 9:10, 3
         )
-
-    })
-
-    # output$Plot <- renderPlot({
-    #
-    #   i <- as.integer(input$summary_row_last_clicked)
-    #   plot(bins[[i]])
-    # })
+    }, server = TRUE)
   }
 }
 
 
+checkbox <- function(.slot) {
+  HTML(sprintf("<input type='checkbox' disabled %s>",
+    ifelse(.slot, "checked", "")))
+}
+
+get.header <- function(object) {
+  tags$div(
+    tags$b(object@name),
+    tags$br(),
+    "Drop: ", checkbox(object@drop),
+    "In Model: ", checkbox(object@inmodel),
+    "New: ", checkbox(object@new),
+    "Step 2: ", checkbox(object@steptwo),
+    "Approved: ", checkbox(object@approved)
+  )
+}
 
 adjust2 <- function(bins) {
   require(shiny)

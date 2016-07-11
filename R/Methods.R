@@ -27,7 +27,13 @@ setMethod("as.data.frame", signature = c("Bin", "missing", "missing"),
 
     out <- data.frame(rbind(out, Total=Total))
     colnames(out) <- c("N", "#1", "#0", "%N","%1","%0","P(1)","WoE","IV", "Pred")
-    out
+
+    ## create summary whenever as.data.frame is requested
+    su <- get.bin.summary(out, x)
+
+    structure(
+      out,
+      summary = su)
 })
 
 setMethod("as.data.frame", signature = c("Classing", "missing", "missing"),
@@ -89,10 +95,11 @@ setMethod("collapse", signature = c("Discrete", "factor"),
 ## set the pred slot in Bin using the WoE if values aren't passed
 setMethod("Update", signature = c("Bin"),
   function(object) {
-    pred <- head(as.data.frame(object)$WoE, -1)
+    df <- as.data.frame(object)
+    pred <- head(df$WoE, -1)
     names(pred) <- levels(collapse(object, object@x[1]))
     pred["Missing"] <- 0
-    initialize(object, pred=pred)
+    initialize(object, pred=pred, summary=attr(df, "summary"))
   })
 
 

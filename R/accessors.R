@@ -41,7 +41,7 @@ setMethod("names", "Classing", function(x) {
 setMethod("set.meta.attr", "Bin",
   function(x, value, .slot) {
     slot(x, .slot) <- value
-    initialize(x)
+    Update(x)
 })
 
 setMethod("set.meta.attr", "Classing",
