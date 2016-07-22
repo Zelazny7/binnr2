@@ -84,6 +84,7 @@ setMethod("adjust", "Classing",
           (m)ono
           (e)xceptions
           (s)et equal
+          penalty (f)actor
           (b)ookmark
           (u)ndo
           (r)eset
@@ -222,6 +223,10 @@ setMethod("adjust", "Classing",
         if (length(x[[i]]@history) > 0) x[[i]] <- x[[i]]@history[[1]]
       } else if (command == "r") {
         x[[i]] <- Bin(x[[i]])
+      } else if (command == "f") {
+        cat("Enter Penalty Factor:")
+        v <- as.integer(readLines(n = 1))
+        penalty(x[[i]]) <- if (!is.na(v)) v else 1
       } else {
         tryCatch({
           x[[i]] <- eval(parse(text=paste("x[[i]]", command)))

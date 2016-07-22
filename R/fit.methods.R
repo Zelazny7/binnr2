@@ -37,8 +37,9 @@ setMethod("fit", signature = c(object="Classing", x="data.frame", y="numeric"),
 
     ## set the penalty factor for fixed vars
     im <- inmodel(object)
-    pf <- rep(1, length(object))
-    if (fixed) pf[im] <- 0
+    pf <- penalty(object)
+    #pf <- rep(1, length(object))
+    if (fixed) pf[im & pf != 1] <- 0
 
     fit <- glmnet::cv.glmnet(woe, y, weights=w, nfolds=nfolds,
                              lower.limits=lower.limits,

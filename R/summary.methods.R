@@ -1,4 +1,5 @@
 get.bin.summary <- function(df, object) {
+  #browser()
   Nex <- if (is(object, "continuous"))
     sum(object@x %in% object@exceptions) else 0
   Nna <- sum(is.na(object@x))
@@ -6,8 +7,7 @@ get.bin.summary <- function(df, object) {
   ## summarize the meta data
   meta <- names(getSlots("Meta"))
   meta <- meta[!meta %in% c("history", "summary")]
-  meta <- sapply(meta, function(x) c("N" , "Y")[slot(object, x) + 1],
-    simplify = F)
+  meta <- sapply(meta, function(x) slot(object, x), simplify = F)
 
   ## return a data.frame of summary info
   data.frame(

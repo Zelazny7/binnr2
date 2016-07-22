@@ -11,6 +11,8 @@
 struct iv {
   double asc_woe;
   double dsc_woe;
+  double asc_iv;
+  double dsc_iv;
   double iv;
 };
 

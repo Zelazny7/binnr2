@@ -122,9 +122,9 @@ size_t find_best_split(int start, int stop, struct xtab* xtab, double* grand_tot
       valid = -1;
     } else if ((dsc[0] + dsc[1]) < o->min_cnt) { // minsplit
       valid = -1;
-    } else if (iv.iv < o->min_iv) { // min iv
+    } else if (isinf(iv.iv) | isnan(iv.iv)) { // infinite or nan iv
       valid = -1;
-    } else if (isinf(iv.iv)) { // infinite iv
+    } else if (iv.iv < o->min_iv) { // min iv
       valid = -1;
     } else if ((asc[1] < o->min_res) | (dsc[1] < o->min_res))  {
       valid = -1;
@@ -150,9 +150,9 @@ struct iv calc_iv(double* asc_cnts, double* dsc_cnts, double* tots) {
   iv.asc_woe = log((asc_cnts[0]/tots[0])/(asc_cnts[1]/tots[1]));
   iv.dsc_woe = log((dsc_cnts[0]/tots[0])/(dsc_cnts[1]/tots[1]));
 
-  double asc_iv  = iv.asc_woe * (asc_cnts[0]/tots[0] - asc_cnts[1]/tots[1]);
-  double dsc_iv  = iv.dsc_woe * (dsc_cnts[0]/tots[0] - dsc_cnts[1]/tots[1]);
-  iv.iv = asc_iv + dsc_iv;
+  iv.asc_iv  = iv.asc_woe * (asc_cnts[0]/tots[0] - asc_cnts[1]/tots[1]);
+  iv.dsc_iv  = iv.dsc_woe * (dsc_cnts[0]/tots[0] - dsc_cnts[1]/tots[1]);
+  iv.iv = iv.asc_iv + iv.dsc_iv;
 
   return iv;
 }

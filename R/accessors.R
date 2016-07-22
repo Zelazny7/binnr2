@@ -10,6 +10,12 @@ setAs("Classing", "list", def = function(from) from@classing)
 dropped <- function(x) get.meta.attr(x, "drop")
 
 #' @export
+`penalty<-` <- function(x, value) set.meta.attr(x, value, "penalty")
+
+#' @export
+`penalty` <- function(x, value) get.meta.attr(x, "penalty")
+
+#' @export
 `inmodel<-` <- function(x, value) set.meta.attr(x, value, "inmodel")
 
 #' @export
