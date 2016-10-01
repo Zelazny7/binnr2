@@ -8,10 +8,11 @@ setClass("Meta", slots = list(
   steptwo = "logical",
   approved= "logical",
   penalty = "numeric",
+  cache   = "data.frame",
   history = "list",
   summary = "list"),
   prototype = prototype(drop=FALSE, inmodel=FALSE, new=FALSE, steptwo=FALSE,
-                        approved=FALSE, penalty=1),
+                        approved=FALSE, penalty=1, data.frame=NULL),
   contains = "VIRTUAL")
 
 ## virtual class contained by all bins

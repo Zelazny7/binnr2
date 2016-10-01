@@ -6,7 +6,7 @@ get.bin.summary <- function(df, object) {
 
   ## summarize the meta data
   meta <- names(getSlots("Meta"))
-  meta <- meta[!meta %in% c("history", "summary")]
+  meta <- meta[!meta %in% c("history", "summary", "cache")]
   meta <- sapply(meta, function(x) slot(object, x), simplify = F)
 
   ## return a data.frame of summary info

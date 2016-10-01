@@ -3,6 +3,8 @@
 
 setMethod("as.data.frame", signature = c("Bin", "missing", "missing"),
   function(x, row.names = NULL, optional = FALSE, ...) {
+
+
     binned <- collapse(x)
     f <- !is.na(x@x)
 
@@ -160,8 +162,6 @@ setMethod("[[", signature = c(x="Segmented-Classing", i="ANY", j="missing"),
 #' @export
 setMethod("[", signature = c(x="Segmented-Classing", i="ANY", j="missing"),
   function(x, i, j, ...) {
-    # browser()
-    #seg <- factor(x@segmentor[x@segmentor %in% levels(x@segmentor)[idx]])
     initialize(x, classings=x@classings[i])
   })
 
@@ -174,8 +174,6 @@ setMethod("[[", signature = c(x="Segmented-Scorecard", i="ANY", j="missing"),
 #' @export
 setMethod("[", signature = c(x="Segmented-Scorecard", i="ANY", j="missing"),
   function(x, i, j, ...) {
-    # idx <- match(names(x@scorecards)[i], levels(x@segmentor))
-    # seg <- factor(x@segmentor[x@segmentor %in% levels(x@segmentor)[idx]])
     initialize(x, scorecards=x@scorecards[i])
   })
 

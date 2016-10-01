@@ -21,6 +21,7 @@ Collate:
     'accessors.R'
     'adjust.methods.R'
     'compare.R'
+    'decorators.R'
     'fit.methods.R'
     'imports.R'
     'plot.Bin.R'

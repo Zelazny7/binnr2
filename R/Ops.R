@@ -23,6 +23,7 @@ setMethod("-", signature = c("continuous", "numeric"),
     ## make sure the requested collapse levels are within the acceptable range
     e2 <- unique(pmax(pmin(tail(e2, -1), length(e1@cuts) - 1), 2))
     e1@cuts <- e1@cuts[-(e2)]
+    e1
     Update(e1)
   })
 
