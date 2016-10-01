@@ -4,6 +4,7 @@
 setMethod("as.data.frame", signature = c("Bin", "missing", "missing"),
   function(x, row.names = NULL, optional = FALSE, ...) {
 
+    #if (!is.null(x@cache)) return(x@cache)
 
     binned <- collapse(x)
     f <- !is.na(x@x)
@@ -33,9 +34,9 @@ setMethod("as.data.frame", signature = c("Bin", "missing", "missing"),
     ## create summary whenever as.data.frame is requested
     su <- get.bin.summary(out, x)
 
-    structure(
-      out,
-      summary = su)
+    x@cache <- out
+    x@summary <- su
+    x
 })
 
 setMethod("as.data.frame", signature = c("Classing", "missing", "missing"),
@@ -97,11 +98,12 @@ setMethod("collapse", signature = c("Discrete", "factor"),
 ## set the pred slot in Bin using the WoE if values aren't passed
 setMethod("Update", signature = c("Bin"),
   function(object) {
-    df <- as.data.frame(object)
-    pred <- head(df$WoE, -1)
+    x <- as.data.frame(object)
+    pred <- head(x@cache$WoE, -1)
     names(pred) <- levels(collapse(object, object@x[1]))
     pred["Missing"] <- 0
-    initialize(object, pred=pred, summary=attr(df, "summary"))
+    x@cache$Pred[1:length(pred)] <- pred
+    initialize(x, pred=pred)
   })
 
 

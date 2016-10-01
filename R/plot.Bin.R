@@ -11,7 +11,8 @@ cold.day.breaks <- c(-Inf, 100, 500, 1000, 5000, Inf)
 setMethod("plot", signature = "Bin", definition = function(x, y, ...) {
   old.par <- par(oma=c(0,0,0,0),mar=c(0,0,0,0))
   # coerce bin into data.frame
-  full <- as.data.frame(x)
+  #full <- as.data.frame(x)
+  full <- x@cache
   f <- !(rownames(full) %in% "Missing") & rownames(full) != "Total"
   plt <- full[f,]
 

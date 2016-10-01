@@ -69,6 +69,9 @@ setMethod("-", signature = c("Discrete", "numeric"),
 set.equal <- function(b, v1, v2) {
   b@history[[1]] <- b
   b@pred[v1] <- b@pred[v2]
+
+  b@cache$Pred[1:length(b@pred)] <- b@pred
+
   b
 }
 

@@ -1,5 +1,6 @@
 setClassUnion("ValidBinType", c("numeric", "factor"))
 setClassUnion("cantBin", c("character","logical"))
+setClassUnion("NullOrDF", c("NULL","data.frame"))
 
 setClass("Meta", slots = list(
   drop    = "logical",
@@ -8,11 +9,11 @@ setClass("Meta", slots = list(
   steptwo = "logical",
   approved= "logical",
   penalty = "numeric",
-  cache   = "data.frame",
+  cache   = "NullOrDF",
   history = "list",
   summary = "list"),
   prototype = prototype(drop=FALSE, inmodel=FALSE, new=FALSE, steptwo=FALSE,
-                        approved=FALSE, penalty=1, data.frame=NULL),
+                        approved=FALSE, penalty=1, cache=NULL),
   contains = "VIRTUAL")
 
 ## virtual class contained by all bins

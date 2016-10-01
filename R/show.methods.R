@@ -2,7 +2,8 @@
 
 setMethod("show", signature = "Bin",
   function(object) {
-    df <- as.data.frame(object)
+    #df <- as.data.frame(object)
+    df <- object@cache
 
     # iv <- df['Total', "IV"]
     cat(sprintf("\n%-32s\nDropped [%1s] | In Model [%1s] | New [%1s] | Step 2 [%1s] | Approved [%1s] \n",
