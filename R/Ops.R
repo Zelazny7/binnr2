@@ -14,6 +14,7 @@ setMethod("!=", signature = c("Bin", "numeric"),
 
 setMethod("-", signature = c("continuous", "numeric"),
   function(e1, e2) {
+    #browser()
     if (length(e2) == 1) return(e1)
 
     ## fill in gaps if first and last are selected, for example

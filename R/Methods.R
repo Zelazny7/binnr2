@@ -10,32 +10,37 @@ setMethod("as.data.frame", signature = c("Bin", "missing", "missing"),
     f <- !is.na(x@x)
 
     ## get the bivariate matrix
-    out <- mapply(.bv, split(x@y, binned), split(x@w, binned),
-                  MoreArgs = list(Y=x@y, W=x@w, f=f), SIMPLIFY = FALSE)
 
-    out[sapply(out, is.null)] <- 0
+    ## pass the weighted sums once
+    Y1 = sum((x@y == 1) * x@w)
+    Y0 = sum((x@y == 0) * x@w)
 
-    out <- do.call(rbind, out)
+    out <- t(mapply(.bv, split(x@y, binned), split(x@w, binned),
+      MoreArgs = list(Y1=Y1, Y0=Y0, W=Y1+Y0, f=f), SIMPLIFY = TRUE))
+
+    #out[sapply(out, is.null)] <- 0
+
+    #out <- do.call(rbind, out)
     out[is.infinite(out) | is.nan(out)] <- 0
-    out <- cbind(out, Pred=x@pred[row.names(out)])
+    #out <- cbind(out, Pred=x@pred[row.names(out)])
 
     rn <- row.names(out)
     rn <- ifelse(nchar(rn) > 40, paste0(strtrim(rn, 37), "..."), rn)
     row.names(out) <- paste(sprintf("%02d", 1:nrow(out)), rn, sep = ". ")
 
     ## calculate totals
-    Total <- apply(out, 2, sum, na.rm=T)
+    Total <- colSums(out, na.rm=T)
     Total[c(5:8,10)] <- 0
     Total[7] <- Total[2]/Total[1]
 
-    out <- data.frame(rbind(out, Total=Total))
-    colnames(out) <- c("N", "#1", "#0", "%N","%1","%0","P(1)","WoE","IV", "Pred")
+    out <- data.frame(rbind(out, Total=Total), check.names = FALSE)
+    #colnames(out) <- c("N", "#1", "#0", "%N","%1","%0","P(1)","WoE","IV", "Pred")
 
     ## create summary whenever as.data.frame is requested
-    su <- get.bin.summary(out, x)
+    #su <- get.bin.summary(out, x)
 
     x@cache <- out
-    x@summary <- su
+    x@summary <- get.bin.summary(out, x)
     x
 })
 
@@ -75,7 +80,7 @@ setMethod("collapse", signature = c("continuous", "numeric"),
 
     bins <- cut(x[f], object@cuts, include.lowest = T, labels = lbls)
 
-    out <- factor(x, exclude=NULL, levels=c(levels(bins),object@exceptions, NA))
+    out <- factor(x, exclude=NULL, levels=c(levels(bins), object@exceptions, NA))
 
     levels(out)[is.na(levels(out))] <- "Missing"
     out[f] <- bins

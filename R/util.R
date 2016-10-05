@@ -7,14 +7,18 @@ slots.to.list <- function(s4) {
 }
 
 # weighted version of .bv
-.bv <- function(y, w, Y, W, f) {
+.bv <- function(y, w, Y1, Y0, W, f) {
   N1  <- sum((y == 1) * w)
   N0  <- sum((y == 0) * w)
-  P1  <- N1/sum((Y == 1) * W)
-  P0  <- N0/sum((Y == 0) * W)
+  # P1  <- N1/sum((Y == 1) * W)
+  # P0  <- N0/sum((Y == 0) * W)
+  P1  <- N1/Y1
+  P0  <- N0/Y0
   WoE <- log(P1 / P0)
   IV  <- (P1 - P0) * WoE
-  c(N=sum(w), N1, N0, PN=sum(w)/sum(W), P1, P0, N1/sum(w), WoE, IV)
+  #c("N", "#1", "#0", "%N","%1","%0","P(1)","WoE","IV", "Pred")
+  c(`N`=sum(w), `#1`=N1, `#0`=N0, `%N`=sum(w)/W, `%1`=N1/Y1, `%0`=N0/Y0,
+    `P(1)`=N1/sum(w), WoE=WoE, IV=IV, Pred=WoE)
 }
 
 #' @export
