@@ -1,15 +1,16 @@
 #' @include allGenerics.R
 #' @include Scorecard.class.R
 
+add_guides_to_rownames = function(rn) {
+  rn <- ifelse(nchar(rn) > 40, paste0(strtrim(rn, 37), "..."), rn)
+  paste(sprintf("%02d", seq_along(rn)), rn, sep = ". ")
+}
+
 setMethod("as.data.frame", signature = c("Bin", "missing", "missing"),
   function(x, row.names = NULL, optional = FALSE, ...) {
 
-    #if (!is.null(x@cache)) return(x@cache)
-
     binned <- collapse(x)
     f <- !is.na(x@x)
-
-    ## get the bivariate matrix
 
     ## pass the weighted sums once
     Y1 = sum((x@y == 1) * x@w)
@@ -18,15 +19,8 @@ setMethod("as.data.frame", signature = c("Bin", "missing", "missing"),
     out <- t(mapply(.bv, split(x@y, binned), split(x@w, binned),
       MoreArgs = list(Y1=Y1, Y0=Y0, W=Y1+Y0, f=f), SIMPLIFY = TRUE))
 
-    #out[sapply(out, is.null)] <- 0
-
-    #out <- do.call(rbind, out)
     out[is.infinite(out) | is.nan(out)] <- 0
-    #out <- cbind(out, Pred=x@pred[row.names(out)])
-
-    rn <- row.names(out)
-    rn <- ifelse(nchar(rn) > 40, paste0(strtrim(rn, 37), "..."), rn)
-    row.names(out) <- paste(sprintf("%02d", 1:nrow(out)), rn, sep = ". ")
+    row.names(out) <- add_guides_to_rownames(row.names(out))
 
     ## calculate totals
     Total <- colSums(out, na.rm=T)
@@ -34,10 +28,6 @@ setMethod("as.data.frame", signature = c("Bin", "missing", "missing"),
     Total[7] <- Total[2]/Total[1]
 
     out <- data.frame(rbind(out, Total=Total), check.names = FALSE)
-    #colnames(out) <- c("N", "#1", "#0", "%N","%1","%0","P(1)","WoE","IV", "Pred")
-
-    ## create summary whenever as.data.frame is requested
-    #su <- get.bin.summary(out, x)
 
     x@cache <- out
     x@summary <- get.bin.summary(out, x)
@@ -63,24 +53,24 @@ setMethod("as.data.frame", signature = c("Scorecard", "missing", "missing"),
 setMethod("collapse", signature = c("Bin", "missing"),
   function(object, x, ...) callGeneric(object, object@x))
 
+fmt_numeric_cuts <- function(cuts) {
+  l = format(cuts, trim=TRUE, nsmall=2, digits=2, big.mark=",",
+    scientific = FALSE)
+
+  fmt = sprintf("(%%%1$ds - %%%1$ds]", max(nchar(l))) ## get width of largest value
+
+  sprintf(fmt, head(l,-1), tail(l, -1))
+}
 
 setMethod("collapse", signature = c("continuous", "numeric"),
   function(object, x, ...) {
-    f <- !is.na(x) & !(x %in% object@exceptions)
+    f = !is.na(x) & !(x %in% object@exceptions)
 
-    l <- format(object@cuts, trim=TRUE, nsmall=2, digits=2, big.mark=",",
-                scientific = FALSE)
+    lbls = fmt_numeric_cuts(object@cuts)
 
-    ## get width of largest value
-    width <- max(nchar(l))
+    bins = cut(x[f], object@cuts, include.lowest = T, labels = lbls)
 
-    fmt <- sprintf("(%%%1$ds - %%%1$ds]", width)
-
-    lbls <- sprintf(fmt, head(l,-1), tail(l, -1))
-
-    bins <- cut(x[f], object@cuts, include.lowest = T, labels = lbls)
-
-    out <- factor(x, exclude=NULL, levels=c(levels(bins), object@exceptions, NA))
+    out  = factor(x, exclude=NULL, levels=c(levels(bins), object@exceptions, NA))
 
     levels(out)[is.na(levels(out))] <- "Missing"
     out[f] <- bins
