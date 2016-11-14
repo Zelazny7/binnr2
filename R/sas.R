@@ -20,11 +20,15 @@ setMethod("sas", signature = "continuous",
       sprintf("else if %s <= %s\n  then %s_V%02d_w = %s;", v, val, pfx, i,
               head(p[o], -1)),
       sprintf("else %s_V%02d_w = %s;" , pfx, i, tail(p[o], 1)),
-      sprintf("%s_AA_dist_%02d = %s - %s_V%02d_w;", pfx, i, ref, pfx, i))
 
-    ## Distance Calculations
+      ## Reason Codes
+      sprintf("\nif missing(%s)\n  then %s_AA_code_%02d = \"&%s_AA_%02d\";", v, pfx, i, pfx, i),
+      sprintf("else if %s = %s\n  then %s_AA_code_%02d = \"&%s_AA_%02d\";", v, E, pfx, i, pfx, i),
+      sprintf("else if %s <= %s\n  then %s_AA_code_%02d = \"&%s_AA_%02d\";", v, val, pfx, i, pfx, i),
+      sprintf("else %s_AA_code_%02d = \"&%s_AA_%02d\";" , pfx, i, pfx, i),
 
-    ## Adverse Action Codes
+      ## Distance Calculations
+      sprintf("\n%s_AA_dist_%02d = %s - %s_V%02d_w;", pfx, i, ref, pfx, i))
 })
 
 
@@ -46,7 +50,14 @@ setMethod("sas", signature = "Discrete",
       sprintf("if missing(%s)\n  then %s_V%02d_w = %s;", v, pfx, i, p[1]),
       sprintf("else if %s in ('%s')\n  then %s_V%02d_w = %s;", v, val, pfx, i, p[o]),
       sprintf("else %s_V%02d_w = 0;" , pfx, i),
-      sprintf("%s_AA_dist_%02d = %s - %s_V%02d_w;", pfx, i, ref, pfx, i))
+
+      ## AA Code
+      sprintf("\nif missing(%s)\n  then %s_AA_code_%02d = \"&%s_AA_%02d\";", v, pfx, i, pfx, i),
+      sprintf("else if %s in ('%s')\n  then %s_AA_code_%02d = \"&%s_AA_%02d\";", v, val, pfx, i, pfx, i),
+      sprintf("else %s_AA_code_%02d = \"&%s_AA_%02d\";" , pfx, i, pfx, i),
+
+      ## AA Dist
+      sprintf("\n%s_AA_dist_%02d = %s - %s_V%02d_w;", pfx, i, ref, pfx, i))
   })
 
 
@@ -56,9 +67,16 @@ setMethod("sas", signature = "Scorecard",
     v <- which(inmodel(object))
     coefs <- object@coef[-1]
 
-    out <- lapply(seq_along(v), function(i) {
+    ## Print the reason code mappings
+    out <- "/** Adverse Action Code Mappings **/"
+    out <- c(out, lapply(seq_along(v), function(i) {
+      sprintf("%%let %s_AA_%02d = \"\"; /** %s **/", pfx, i, names(object@classing)[v[i]])
+    }))
+
+    ### Print the variables
+    out <- c(out, lapply(seq_along(v), function(i) {
       sas(object@classing[[v[i]]], pfx=pfx, coef=coefs[i], method=method, i=i)
-    })
+    }))
 
     out <- c(out,
       sprintf("\n/*** Final Score Calculation ***/"),

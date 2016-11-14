@@ -225,7 +225,7 @@ setMethod("adjust", "Classing",
         x[[i]] <- Bin(x[[i]])
       } else if (command == "f") {
         cat("Enter Penalty Factor:")
-        v <- as.integer(readLines(n = 1))
+        v <- as.numeric(readLines(n = 1))
         penalty(x[[i]]) <- if (!is.na(v)) v else 1
       } else {
         tryCatch({
