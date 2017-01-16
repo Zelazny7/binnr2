@@ -54,8 +54,8 @@ setMethod("collapse", signature = c("Bin", "missing"),
   function(object, x, ...) callGeneric(object, object@x))
 
 fmt_numeric_cuts <- function(cuts) {
-  l = format(cuts, trim=TRUE, nsmall=2, digits=2, big.mark=",",
-    scientific = FALSE)
+l = format(round(cuts, 2), trim=TRUE, nsmall=2, digits=2, big.mark=",",
+  scientific = FALSE)
 
   fmt = sprintf("(%%%1$ds - %%%1$ds]", max(nchar(l))) ## get width of largest value
 
